@@ -39,37 +39,54 @@ export const structuredCompletion = async <T>(
   return object;
 };
 
+export type ImageProvider =
+  | { type: "fal"; falKey: string }
+  | { type: "modal"; url: string };
+
 export const generateAiImage = async ({
   prompt,
   path,
-  falKey,
+  provider,
   onRetry,
 }: {
   prompt: string;
   path: string;
-  falKey: string;
+  provider: ImageProvider;
   onRetry: (attempt: number) => void;
 }): Promise<void> => {
-  fal.config({ credentials: falKey });
-
   const maxRetries = 3;
   let attempt = 0;
   let lastError: Error | null = null;
 
   while (attempt < maxRetries) {
     try {
-      const result = await fal.subscribe("fal-ai/flux-pro/v1.1", {
-        input: {
-          prompt,
-          image_size: { width: IMAGE_WIDTH, height: IMAGE_HEIGHT },
-          num_images: 1,
-        },
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const imageUrl = (result.data as any).images[0].url as string;
-      const response = await fetch(imageUrl);
-      fs.writeFileSync(path, Buffer.from(await response.arrayBuffer()));
+      if (provider.type === "modal") {
+        const res = await fetch(provider.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            width: IMAGE_WIDTH,
+            height: IMAGE_HEIGHT,
+          }),
+        });
+        if (!res.ok) throw new Error(`Modal error: ${await res.text()}`);
+        const data = (await res.json()) as { image_b64: string };
+        fs.writeFileSync(path, Buffer.from(data.image_b64, "base64"));
+      } else {
+        fal.config({ credentials: provider.falKey });
+        const result = await fal.subscribe("fal-ai/flux-pro/v1.1", {
+          input: {
+            prompt,
+            image_size: { width: IMAGE_WIDTH, height: IMAGE_HEIGHT },
+            num_images: 1,
+          },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const imageUrl = (result.data as any).images[0].url as string;
+        const response = await fetch(imageUrl);
+        fs.writeFileSync(path, Buffer.from(await response.arrayBuffer()));
+      }
       return;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));

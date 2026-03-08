@@ -8,6 +8,7 @@ import chalk from "chalk";
 import * as dotenv from "dotenv";
 import {
   AiProvider,
+  ImageProvider,
   createModel,
   generateAiImage,
   generateVoice,
@@ -36,6 +37,7 @@ interface GenerateOptions {
   title?: string;
   topic?: string;
   provider?: AiProvider;
+  imageProvider?: "fal" | "modal";
 }
 
 class ContentFS {
@@ -94,7 +96,6 @@ async function generateStory(options: GenerateOptions) {
       (provider === "anthropic"
         ? process.env.ANTHROPIC_API_KEY
         : process.env.OPENAI_API_KEY);
-    let falKey = options.falKey ?? process.env.FAL_KEY;
     let elevenlabsApiKey =
       options.elevenlabsApiKey ?? process.env.ELEVENLABS_API_KEY;
 
@@ -113,18 +114,45 @@ async function generateStory(options: GenerateOptions) {
       apiKey = response.apiKey;
     }
 
-    if (!falKey) {
-      const response = await prompts({
-        type: "password",
-        name: "falKey",
-        message: "Enter your fal.ai API key (for image generation):",
-        validate: (value) => value.length > 0 || "fal.ai API key is required",
+    // Resolve image provider: Modal (free tier) > fal.ai > prompt
+    let imageProvider: ImageProvider;
+    const modalUrl = process.env.MODAL_IMAGE_GEN_URL;
+    const falKey = options.falKey ?? process.env.FAL_KEY;
+
+    if (options.imageProvider === "modal" || (!options.imageProvider && modalUrl)) {
+      const url = modalUrl!;
+      imageProvider = { type: "modal", url };
+      console.log(chalk.blue("Images: Modal (FLUX.1-schnell)"));
+    } else if (options.imageProvider === "fal" || (!options.imageProvider && falKey)) {
+      imageProvider = { type: "fal", falKey: falKey! };
+      console.log(chalk.blue("Images: fal.ai (Flux Pro)"));
+    } else {
+      const { choice } = await prompts({
+        type: "select",
+        name: "choice",
+        message: "Choose image provider:",
+        choices: [
+          { title: "fal.ai — Flux Pro ($0.03/image)", value: "fal" },
+          { title: "Modal — FLUX.1-schnell (~$0.002/image, requires setup)", value: "modal" },
+        ],
       });
-      if (!response.falKey) {
-        console.log(chalk.red("fal.ai API key is required. Exiting..."));
-        process.exit(1);
+      if (choice === "modal") {
+        const { url } = await prompts({
+          type: "text",
+          name: "url",
+          message: "Enter your Modal endpoint URL:",
+          validate: (v: string) => v.startsWith("https://") || "Must be a valid HTTPS URL",
+        });
+        imageProvider = { type: "modal", url };
+      } else {
+        const { key } = await prompts({
+          type: "password",
+          name: "key",
+          message: "Enter your fal.ai API key:",
+          validate: (v: string) => v.length > 0 || "Key is required",
+        });
+        imageProvider = { type: "fal", falKey: key };
       }
-      falKey = response.falKey;
     }
 
     if (!elevenlabsApiKey) {
@@ -224,7 +252,7 @@ async function generateStory(options: GenerateOptions) {
       await generateAiImage({
         prompt: storyItem.imageDescription,
         path: contentFs.getImagePath(storyItem.uid),
-        falKey: falKey!,
+        provider: imageProvider,
         onRetry: (attempt) => {
           imagesSpinner.text = `[${i * 2 + 1}/${total}] Generating image (retry ${attempt})...`;
         },
@@ -270,6 +298,11 @@ const commonOptions = (yargs: ReturnType<typeof import("yargs")>) =>
       type: "string",
       description: "fal.ai API key for image generation",
     })
+    .option("image-provider", {
+      type: "string",
+      choices: ["fal", "modal"] as const,
+      description: "Image generation provider (default: auto-detect from env)",
+    })
     .option("title", {
       alias: "t",
       type: "string",
@@ -298,6 +331,7 @@ yargs(hideBin(process.argv))
         title: argv.title,
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
+        imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
       });
     },
   )
@@ -312,6 +346,7 @@ yargs(hideBin(process.argv))
         title: argv.title,
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
+        imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
       });
     },
   )
