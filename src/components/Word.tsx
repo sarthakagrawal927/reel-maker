@@ -1,25 +1,39 @@
+import type { TikTokPage } from "@remotion/captions";
 import { makeTransform, scale, translateY } from "@remotion/animation-utils";
-import { loadFont } from "@remotion/google-fonts/BreeSerif";
 import { fitText } from "@remotion/layout-utils";
+import { loadFont } from "@remotion/google-fonts/BreeSerif";
 import type React from "react";
-import { AbsoluteFill, interpolate, useVideoConfig } from "remotion";
+import {
+  AbsoluteFill,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
 
-export const Word: React.FC<{
-  enterProgress: number;
-  text: string;
-  stroke: boolean;
-}> = ({ enterProgress, text, stroke }) => {
+const HIGHLIGHT_COLOR = "#FFE500";
+
+export const Word: React.FC<{ page: TikTokPage }> = ({ page }) => {
+  const frame = useCurrentFrame();
+  const { fps, width } = useVideoConfig();
   const { fontFamily } = loadFont();
-  const { width } = useVideoConfig();
-  const desiredFontSize = 120;
+  const timeInMs = (frame / fps) * 1000;
+
+  const enter = spring({
+    frame,
+    fps,
+    config: { damping: 200 },
+    durationInFrames: 5,
+  });
 
   const fittedText = fitText({
     fontFamily,
-    text,
-    withinWidth: width * 0.8,
+    text: page.text,
+    withinWidth: width * 0.85,
+    textTransform: "uppercase",
   });
 
-  const fontSize = Math.min(desiredFontSize, fittedText.fontSize);
+  const fontSize = Math.min(120, fittedText.fontSize);
 
   return (
     <AbsoluteFill
@@ -34,18 +48,32 @@ export const Word: React.FC<{
       <div
         style={{
           fontSize,
-          color: "white",
-          WebkitTextStroke: stroke ? "20px black" : undefined,
+          WebkitTextStroke: "15px black",
+          paintOrder: "stroke fill",
           transform: makeTransform([
-            scale(interpolate(enterProgress, [0, 1], [0.8, 1])),
-            translateY(interpolate(enterProgress, [0, 1], [50, 0])),
+            scale(interpolate(enter, [0, 1], [0.8, 1])),
+            translateY(interpolate(enter, [0, 1], [50, 0])),
           ]),
           fontFamily,
           textTransform: "uppercase",
           textAlign: "center",
         }}
       >
-        {text}
+        {page.tokens.map((token) => {
+          const active = token.fromMs <= timeInMs && token.toMs > timeInMs;
+          return (
+            <span
+              key={token.fromMs}
+              style={{
+                display: "inline",
+                whiteSpace: "pre",
+                color: active ? HIGHLIGHT_COLOR : "white",
+              }}
+            >
+              {token.text}
+            </span>
+          );
+        })}
       </div>
     </AbsoluteFill>
   );

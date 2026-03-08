@@ -24,7 +24,7 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
   const { id } = useVideoConfig();
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "white" }}>
+    <AbsoluteFill style={{ backgroundColor: "black" }}>
       <Sequence durationInFrames={INTRO_DURATION}>
         <AbsoluteFill
           style={{
@@ -82,11 +82,11 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
 
         return (
           <Sequence
-            key={`element-${index}`}
+            key={`text-${index}`}
             from={startFrame}
             durationInFrames={duration}
           >
-            <Subtitle key={index} text={element.text} />
+            <Subtitle captions={element.captions} sceneStartMs={element.startMs} />
           </Sequence>
         );
       })}
@@ -100,7 +100,7 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
 
         return (
           <Sequence
-            key={`element-${index}`}
+            key={`audio-${index}`}
             from={startFrame}
             durationInFrames={duration}
             premountFor={3 * FPS}

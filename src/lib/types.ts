@@ -25,14 +25,19 @@ const BackgroundElementSchema = TimelineElementSchema.extend({
   animations: z.array(ElementAnimationSchema).optional(),
 });
 
-const TextElementSchema = TimelineElementSchema.extend({
+const CaptionTokenSchema = z.object({
   text: z.string(),
+  startMs: z.number(),
+  endMs: z.number(),
+});
+
+const TextElementSchema = TimelineElementSchema.extend({
+  captions: z.array(CaptionTokenSchema),
   position: z.union([
     z.literal("top"),
     z.literal("bottom"),
     z.literal("center"),
   ]),
-  animations: z.array(ElementAnimationSchema).optional(),
 });
 
 const AudioElementSchema = TimelineElementSchema.extend({
@@ -53,6 +58,7 @@ export type BackgroundTransitionType = z.infer<
 export type TimelineElement = z.infer<typeof TimelineElementSchema>;
 export type ElementAnimation = z.infer<typeof ElementAnimationSchema>;
 export type BackgroundElement = z.infer<typeof BackgroundElementSchema>;
+export type CaptionToken = z.infer<typeof CaptionTokenSchema>;
 export type TextElement = z.infer<typeof TextElementSchema>;
 export type AudioElement = z.infer<typeof AudioElementSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;
@@ -61,6 +67,7 @@ export {
   AudioElementSchema,
   BackgroundElementSchema,
   BackgroundTransitionTypeSchema,
+  CaptionTokenSchema,
   ElementAnimationSchema,
   TextElementSchema,
   TimelineElementSchema,

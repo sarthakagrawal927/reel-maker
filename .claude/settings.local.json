@@ -6,7 +6,12 @@
       "Bash(cd /Users/sarthakagrawal/Desktop && bunx create-video@latest --help 2>&1 | head -30)",
       "Bash(cd /Users/sarthakagrawal/Desktop && bunx degit remotion-dev/remotion/packages/template-prompt-to-video my-video --force 2>&1)",
       "Bash(bun install 2>&1)",
-      "Bash(git init && cat > .gitignore << 'EOF'\nnode_modules\ndist\n.DS_Store\n.env\nout\nEOF\ngit add -A && git commit -m \"Initial commit: Remotion AI reel template \\(prompt-to-video base\\)\")"
+      "Bash(git init && cat > .gitignore << 'EOF'\nnode_modules\ndist\n.DS_Store\n.env\nout\nEOF\ngit add -A && git commit -m \"Initial commit: Remotion AI reel template \\(prompt-to-video base\\)\")",
+      "Bash(gh repo create reel-maker --public --description \"AI-powered TikTok/Reels video generator built on Remotion\" --source /Users/sarthakagrawal/Desktop/my-video --push 2>&1)",
+      "Bash(bun run lint 2>&1)",
+      "Bash(ls /Users/sarthakagrawal/Desktop/my-video/node_modules/@types/yargs 2>&1 && bun add -d @types/yargs 2>&1 | tail -5I was having issues running this SDK. Can you check whether it is runnable and do testing also?)",
+      "Bash(bun add -d @types/yargs && bun run lint 2>&1)",
+      "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\nfeat: TikTok-style word captions, Flux images, Vercel AI SDK gateway\n\n- Replace 14-char subtitle chunking with word-level caption sync using\n  @remotion/captions + createTikTokStyleCaptions — active word highlights\n  yellow as it's spoken \\(TikTok karaoke style\\)\n- Swap DALL-E 3 → Flux Pro via fal.ai \\(better portrait images, ~4x cheaper\\)\n- Replace openaiStructuredCompletion + setApiKey global state with Vercel AI\n  SDK generateObject — supports OpenAI and Anthropic via --provider flag,\n  auto-detects from which API key is set in env\n- Remove non-deterministic Math.random\\(\\) from timeline generation entirely\n- Add FAL_KEY env var; update .env.example with all three required keys\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push)"
     ]
   }
 }
