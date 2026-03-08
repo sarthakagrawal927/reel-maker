@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/sarthakagrawal/Desktop/**)",
+      "Bash(bunx create-video@latest --template=ai-video my-video)",
+      "Bash(cd /Users/sarthakagrawal/Desktop && bunx create-video@latest --help 2>&1 | head -30)",
+      "Bash(cd /Users/sarthakagrawal/Desktop && bunx degit remotion-dev/remotion/packages/template-prompt-to-video my-video --force 2>&1)",
+      "Bash(bun install 2>&1)",
+      "Bash(git init && cat > .gitignore << 'EOF'\nnode_modules\ndist\n.DS_Store\n.env\nout\nEOF\ngit add -A && git commit -m \"Initial commit: Remotion AI reel template \\(prompt-to-video base\\)\")"
+    ]
+  }
+}
