@@ -6,10 +6,11 @@ import { IMAGE_HEIGHT, IMAGE_WIDTH } from "../src/lib/constants";
 import { generateObject, jsonSchema } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { LanguageModel } from "ai";
 import { fal } from "@fal-ai/client";
 
-export type AiProvider = "openai" | "anthropic";
+export type AiProvider = "openai" | "anthropic" | "google";
 
 export const createModel = (
   provider: AiProvider,
@@ -17,9 +18,10 @@ export const createModel = (
   modelId?: string,
 ): LanguageModel => {
   if (provider === "anthropic") {
-    return createAnthropic({ apiKey })(
-      modelId ?? "claude-sonnet-4-5-20251001",
-    );
+    return createAnthropic({ apiKey })(modelId ?? "claude-sonnet-4-5-20251001");
+  }
+  if (provider === "google") {
+    return createGoogleGenerativeAI({ apiKey })(modelId ?? "gemini-2.0-flash");
   }
   return createOpenAI({ apiKey })(modelId ?? "gpt-4.1");
 };

@@ -89,13 +89,19 @@ async function generateStory(options: GenerateOptions) {
   try {
     const provider: AiProvider =
       options.provider ??
-      (process.env.ANTHROPIC_API_KEY ? "anthropic" : "openai");
+      (process.env.ANTHROPIC_API_KEY
+        ? "anthropic"
+        : process.env.GOOGLE_GENERATIVE_AI_API_KEY
+          ? "google"
+          : "openai");
 
     let apiKey =
       options.apiKey ??
       (provider === "anthropic"
         ? process.env.ANTHROPIC_API_KEY
-        : process.env.OPENAI_API_KEY);
+        : provider === "google"
+          ? process.env.GOOGLE_GENERATIVE_AI_API_KEY
+          : process.env.OPENAI_API_KEY);
     let elevenlabsApiKey =
       options.elevenlabsApiKey ?? process.env.ELEVENLABS_API_KEY;
 
@@ -315,8 +321,8 @@ const commonOptions = (yargs: ReturnType<typeof import("yargs")>) =>
     })
     .option("provider", {
       type: "string",
-      choices: ["openai", "anthropic"] as const,
-      description: "AI provider to use for story generation",
+      choices: ["openai", "anthropic", "google"] as const,
+      description: "AI provider for story generation",
     });
 
 yargs(hideBin(process.argv))
