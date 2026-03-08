@@ -132,1432 +132,884 @@
   "text": [
     {
       "startMs": 0,
-      "endMs": 685,
-      "text": "Once upon a",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 685,
-      "endMs": 1695,
-      "text": "time, long",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5070892202427698,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 1695,
-      "endMs": 1997,
-      "text": "before",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.650247613480069,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 1997,
-      "endMs": 2612,
-      "text": "telescopes",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 2612,
-      "endMs": 3042,
-      "text": "watched the",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 3042,
-      "endMs": 4145,
-      "text": "sky, people",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5312906191856691,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 4145,
-      "endMs": 4714,
-      "text": "looked up and",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6984326431081123,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 4714,
-      "endMs": 5410,
-      "text": "saw a bright",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6445892502264121,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 5410,
-      "endMs": 6339,
-      "text": "star, not",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 6339,
-      "endMs": 6896,
-      "text": "knowing it was",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 6896,
       "endMs": 7616,
-      "text": "Venus.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
+          "text": "Once",
           "startMs": 0,
-          "endMs": 300
+          "endMs": 325
+        },
+        {
+          "text": " upon",
+          "startMs": 360,
+          "endMs": 557
+        },
+        {
+          "text": " a",
+          "startMs": 604,
+          "endMs": 627
+        },
+        {
+          "text": " time,",
+          "startMs": 685,
+          "endMs": 1161
+        },
+        {
+          "text": " long",
+          "startMs": 1405,
+          "endMs": 1637
+        },
+        {
+          "text": " before",
+          "startMs": 1695,
+          "endMs": 1962
+        },
+        {
+          "text": " telescopes",
+          "startMs": 1997,
+          "endMs": 2554
+        },
+        {
+          "text": " watched",
+          "startMs": 2612,
+          "endMs": 2902
+        },
+        {
+          "text": " the",
+          "startMs": 2937,
+          "endMs": 3007
+        },
+        {
+          "text": " sky,",
+          "startMs": 3042,
+          "endMs": 3564
+        },
+        {
+          "text": " people",
+          "startMs": 3843,
+          "endMs": 4110
+        },
+        {
+          "text": " looked",
+          "startMs": 4145,
+          "endMs": 4365
+        },
+        {
+          "text": " up",
+          "startMs": 4412,
+          "endMs": 4516
+        },
+        {
+          "text": " and",
+          "startMs": 4574,
+          "endMs": 4656
+        },
+        {
+          "text": " saw",
+          "startMs": 4714,
+          "endMs": 4899
+        },
+        {
+          "text": " a",
+          "startMs": 4957,
+          "endMs": 4992
+        },
+        {
+          "text": " bright",
+          "startMs": 5050,
+          "endMs": 5329
+        },
+        {
+          "text": " star,",
+          "startMs": 5410,
+          "endMs": 5933
+        },
+        {
+          "text": " not",
+          "startMs": 6142,
+          "endMs": 6304
+        },
+        {
+          "text": " knowing",
+          "startMs": 6339,
+          "endMs": 6594
+        },
+        {
+          "text": " it",
+          "startMs": 6641,
+          "endMs": 6699
+        },
+        {
+          "text": " was",
+          "startMs": 6734,
+          "endMs": 6838
+        },
+        {
+          "text": " Venus.",
+          "startMs": 6896,
+          "endMs": 7616
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 7616,
-      "endMs": 8231,
-      "text": "The ancient",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 8231,
-      "endMs": 8916,
-      "text": "Romans named",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.662161653933625,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 8916,
-      "endMs": 9497,
-      "text": "it after their",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 9497,
-      "endMs": 10008,
-      "text": "goddess of",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6388131110354789,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 10008,
-      "endMs": 10600,
-      "text": "love because",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6323294044608418,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 10600,
-      "endMs": 10855,
-      "text": "of its",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 10855,
-      "endMs": 11331,
-      "text": "beautiful",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.689881743853058,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 11331,
       "endMs": 11935,
-      "text": "glow.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 0.5843134627873369,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
+          "text": "The",
+          "startMs": 7616,
+          "endMs": 7848
+        },
+        {
+          "text": " ancient",
+          "startMs": 7906,
+          "endMs": 8173
+        },
+        {
+          "text": " Romans",
+          "startMs": 8231,
+          "endMs": 8591
+        },
+        {
+          "text": " named",
+          "startMs": 8661,
+          "endMs": 8881
+        },
+        {
+          "text": " it",
+          "startMs": 8916,
+          "endMs": 8986
+        },
+        {
+          "text": " after",
+          "startMs": 9032,
+          "endMs": 9253
+        },
+        {
+          "text": " their",
+          "startMs": 9299,
+          "endMs": 9450
+        },
+        {
+          "text": " goddess",
+          "startMs": 9497,
+          "endMs": 9845
+        },
+        {
+          "text": " of",
+          "startMs": 9880,
+          "endMs": 9938
+        },
+        {
+          "text": " love",
+          "startMs": 10008,
+          "endMs": 10228
+        },
+        {
+          "text": " because",
+          "startMs": 10275,
+          "endMs": 10565
+        },
+        {
+          "text": " of",
+          "startMs": 10600,
+          "endMs": 10646
+        },
+        {
+          "text": " its",
+          "startMs": 10693,
+          "endMs": 10809
+        },
+        {
+          "text": " beautiful",
+          "startMs": 10855,
+          "endMs": 11273
+        },
+        {
+          "text": " glow.",
+          "startMs": 11331,
+          "endMs": 11935
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 11935,
-      "endMs": 12690,
-      "text": "Incredibly,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 12690,
-      "endMs": 13015,
-      "text": "there were",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6822711271671517,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 13015,
-      "endMs": 13560,
-      "text": "times it was",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6171702148398952,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 13560,
-      "endMs": 14025,
-      "text": "called both",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 14025,
-      "endMs": 14524,
-      "text": "the 'Morning",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6213784824708739,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 14524,
-      "endMs": 15522,
-      "text": "Star' and the",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 15522,
-      "endMs": 15917,
-      "text": "'Evening",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.679307191316065,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 15917,
-      "endMs": 16962,
-      "text": "Star'—no one",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6175949484127287,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 16962,
-      "endMs": 17577,
-      "text": "realized they",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 17577,
-      "endMs": 18053,
-      "text": "were the same",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 18053,
       "endMs": 18762,
-      "text": "planet!",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Incredibly,",
+          "startMs": 11935,
+          "endMs": 12666
         },
         {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
+          "text": " there",
+          "startMs": 12690,
+          "endMs": 12829
+        },
+        {
+          "text": " were",
+          "startMs": 12864,
+          "endMs": 12980
+        },
+        {
+          "text": " times",
+          "startMs": 13015,
+          "endMs": 13293
+        },
+        {
+          "text": " it",
+          "startMs": 13328,
+          "endMs": 13386
+        },
+        {
+          "text": " was",
+          "startMs": 13421,
+          "endMs": 13502
+        },
+        {
+          "text": " called",
+          "startMs": 13560,
+          "endMs": 13793
+        },
+        {
+          "text": " both",
+          "startMs": 13827,
+          "endMs": 13990
+        },
+        {
+          "text": " the",
+          "startMs": 14025,
+          "endMs": 14094
+        },
+        {
+          "text": " 'Morning",
+          "startMs": 14118,
+          "endMs": 14454
+        },
+        {
+          "text": " Star'",
+          "startMs": 14524,
+          "endMs": 15058
+        },
+        {
+          "text": " and",
+          "startMs": 15232,
+          "endMs": 15372
+        },
+        {
+          "text": " the",
+          "startMs": 15418,
+          "endMs": 15488
+        },
+        {
+          "text": " 'Evening",
+          "startMs": 15522,
+          "endMs": 15848
+        },
+        {
+          "text": " Star'—no",
+          "startMs": 15917,
+          "endMs": 16742
+        },
+        {
+          "text": " one",
+          "startMs": 16800,
+          "endMs": 16916
+        },
+        {
+          "text": " realized",
+          "startMs": 16962,
+          "endMs": 17403
+        },
+        {
+          "text": " they",
+          "startMs": 17438,
+          "endMs": 17543
+        },
+        {
+          "text": " were",
+          "startMs": 17577,
+          "endMs": 17682
+        },
+        {
+          "text": " the",
+          "startMs": 17717,
+          "endMs": 17786
+        },
+        {
+          "text": " same",
+          "startMs": 17821,
+          "endMs": 18019
+        },
+        {
+          "text": " planet!",
+          "startMs": 18053,
+          "endMs": 18762
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 18762,
-      "endMs": 19505,
-      "text": "Unlike any",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.59875153690998,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 19505,
-      "endMs": 20376,
-      "text": "other planet,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5666186805089255,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 20376,
-      "endMs": 21084,
-      "text": "Venus spins",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6654676119000248,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 21084,
-      "endMs": 22152,
-      "text": "backwards, so",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6171542494318256,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 22152,
-      "endMs": 22872,
-      "text": "the Sun rises",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6799068445538758,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 22872,
-      "endMs": 23441,
-      "text": "in the west",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6524040045014661,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 23441,
-      "endMs": 23940,
-      "text": "and sets in",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6973740497614885,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 23940,
       "endMs": 24753,
-      "text": "the east.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Unlike",
+          "startMs": 18762,
+          "endMs": 19250
+        },
+        {
+          "text": " any",
+          "startMs": 19296,
+          "endMs": 19447
+        },
+        {
+          "text": " other",
+          "startMs": 19505,
+          "endMs": 19691
+        },
+        {
+          "text": " planet,",
+          "startMs": 19749,
+          "endMs": 20260
+        },
+        {
+          "text": " Venus",
+          "startMs": 20376,
+          "endMs": 20701
+        },
+        {
+          "text": " spins",
+          "startMs": 20736,
+          "endMs": 21014
+        },
+        {
+          "text": " backwards,",
+          "startMs": 21084,
+          "endMs": 21804
+        },
+        {
+          "text": " so",
+          "startMs": 21955,
+          "endMs": 22094
+        },
+        {
+          "text": " the",
+          "startMs": 22152,
+          "endMs": 22222
+        },
+        {
+          "text": " Sun",
+          "startMs": 22268,
+          "endMs": 22454
+        },
+        {
+          "text": " rises",
+          "startMs": 22524,
+          "endMs": 22825
+        },
+        {
+          "text": " in",
+          "startMs": 22872,
+          "endMs": 22930
+        },
+        {
+          "text": " the",
+          "startMs": 22965,
+          "endMs": 23034
+        },
+        {
+          "text": " west",
+          "startMs": 23069,
+          "endMs": 23371
+        },
+        {
+          "text": " and",
+          "startMs": 23441,
+          "endMs": 23534
+        },
+        {
+          "text": " sets",
+          "startMs": 23592,
+          "endMs": 23801
+        },
+        {
+          "text": " in",
+          "startMs": 23847,
+          "endMs": 23905
+        },
+        {
+          "text": " the",
+          "startMs": 23940,
+          "endMs": 24010
+        },
+        {
+          "text": " east.",
+          "startMs": 24068,
+          "endMs": 24753
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 24753,
-      "endMs": 25519,
-      "text": "Its days are",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5017647501826319,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 25519,
-      "endMs": 26042,
-      "text": "longer than",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5972452883935493,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 26042,
-      "endMs": 27017,
-      "text": "its years,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.564986619802243,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 27017,
-      "endMs": 27609,
-      "text": "making time",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6018507711057028,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 27609,
-      "endMs": 28282,
-      "text": "seem strange",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5782847024126105,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 28282,
       "endMs": 28886,
-      "text": "up there.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 0.5055966053795952,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Its",
+          "startMs": 24753,
+          "endMs": 25090
         },
         {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
+          "text": " days",
+          "startMs": 25136,
+          "endMs": 25345
+        },
+        {
+          "text": " are",
+          "startMs": 25380,
+          "endMs": 25484
+        },
+        {
+          "text": " longer",
+          "startMs": 25519,
+          "endMs": 25821
+        },
+        {
+          "text": " than",
+          "startMs": 25868,
+          "endMs": 25995
+        },
+        {
+          "text": " its",
+          "startMs": 26042,
+          "endMs": 26158
+        },
+        {
+          "text": " years,",
+          "startMs": 26216,
+          "endMs": 26808
+        },
+        {
+          "text": " making",
+          "startMs": 27017,
+          "endMs": 27296
+        },
+        {
+          "text": " time",
+          "startMs": 27342,
+          "endMs": 27574
+        },
+        {
+          "text": " seem",
+          "startMs": 27609,
+          "endMs": 27806
+        },
+        {
+          "text": " strange",
+          "startMs": 27876,
+          "endMs": 28248
+        },
+        {
+          "text": " up",
+          "startMs": 28282,
+          "endMs": 28375
+        },
+        {
+          "text": " there.",
+          "startMs": 28422,
+          "endMs": 28886
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 28886,
-      "endMs": 29629,
-      "text": "Volcanoes",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5629222453413919,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 29629,
-      "endMs": 30244,
-      "text": "cover much of",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5699858221834716,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 30244,
-      "endMs": 31034,
-      "text": "its surface,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5950691148336467,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 31034,
-      "endMs": 31533,
-      "text": "but thick",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5566802724360221,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 31533,
-      "endMs": 31997,
-      "text": "clouds of",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5366881194737613,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 31997,
-      "endMs": 33100,
-      "text": "toxic gas hide",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 33100,
-      "endMs": 33600,
-      "text": "them from our",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6484750077540622,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 33600,
       "endMs": 34087,
-      "text": "view.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 0.5735095017110776,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Volcanoes",
+          "startMs": 28886,
+          "endMs": 29571
         },
         {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
+          "text": " cover",
+          "startMs": 29629,
+          "endMs": 29861
+        },
+        {
+          "text": " much",
+          "startMs": 29931,
+          "endMs": 30105
+        },
+        {
+          "text": " of",
+          "startMs": 30140,
+          "endMs": 30198
+        },
+        {
+          "text": " its",
+          "startMs": 30244,
+          "endMs": 30360
+        },
+        {
+          "text": " surface,",
+          "startMs": 30384,
+          "endMs": 30918
+        },
+        {
+          "text": " but",
+          "startMs": 31034,
+          "endMs": 31208
+        },
+        {
+          "text": " thick",
+          "startMs": 31266,
+          "endMs": 31475
+        },
+        {
+          "text": " clouds",
+          "startMs": 31533,
+          "endMs": 31847
+        },
+        {
+          "text": " of",
+          "startMs": 31881,
+          "endMs": 31939
+        },
+        {
+          "text": " toxic",
+          "startMs": 31997,
+          "endMs": 32427
+        },
+        {
+          "text": " gas",
+          "startMs": 32473,
+          "endMs": 32775
+        },
+        {
+          "text": " hide",
+          "startMs": 32845,
+          "endMs": 33066
+        },
+        {
+          "text": " them",
+          "startMs": 33100,
+          "endMs": 33217
+        },
+        {
+          "text": " from",
+          "startMs": 33275,
+          "endMs": 33402
+        },
+        {
+          "text": " our",
+          "startMs": 33449,
+          "endMs": 33553
+        },
+        {
+          "text": " view.",
+          "startMs": 33600,
+          "endMs": 34087
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 34087,
-      "endMs": 34807,
-      "text": "Although it is",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 34807,
-      "endMs": 35422,
-      "text": "Earth's twin",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6985425271710941,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 35422,
-      "endMs": 36699,
-      "text": "in size, Venus",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6887989441787467,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 36699,
-      "endMs": 37291,
-      "text": "is the hottest",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6311379480437896,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 37291,
-      "endMs": 38278,
-      "text": "planet, with",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5681166169682664,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 38278,
-      "endMs": 38638,
-      "text": "surface",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.654541893694066,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 38638,
-      "endMs": 39161,
-      "text": "temperatures",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 39161,
-      "endMs": 39753,
-      "text": "high enough to",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6818260316184099,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 39753,
       "endMs": 40496,
-      "text": "melt lead.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 0.5424967449824123,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Although",
+          "startMs": 34087,
+          "endMs": 34540
+        },
+        {
+          "text": " it",
+          "startMs": 34575,
+          "endMs": 34633
+        },
+        {
+          "text": " is",
+          "startMs": 34667,
+          "endMs": 34749
+        },
+        {
+          "text": " Earth's",
+          "startMs": 34807,
+          "endMs": 35074
+        },
+        {
+          "text": " twin",
+          "startMs": 35109,
+          "endMs": 35364
+        },
+        {
+          "text": " in",
+          "startMs": 35422,
+          "endMs": 35492
+        },
+        {
+          "text": " size,",
+          "startMs": 35573,
+          "endMs": 36119
+        },
+        {
+          "text": " Venus",
+          "startMs": 36293,
+          "endMs": 36641
+        },
+        {
+          "text": " is",
+          "startMs": 36699,
+          "endMs": 36781
+        },
+        {
+          "text": " the",
+          "startMs": 36827,
+          "endMs": 36897
+        },
+        {
+          "text": " hottest",
+          "startMs": 36943,
+          "endMs": 37245
+        },
+        {
+          "text": " planet,",
+          "startMs": 37291,
+          "endMs": 37849
+        },
+        {
+          "text": " with",
+          "startMs": 38058,
+          "endMs": 38232
+        },
+        {
+          "text": " surface",
+          "startMs": 38278,
+          "endMs": 38603
+        },
+        {
+          "text": " temperatures",
+          "startMs": 38638,
+          "endMs": 39103
+        },
+        {
+          "text": " high",
+          "startMs": 39161,
+          "endMs": 39323
+        },
+        {
+          "text": " enough",
+          "startMs": 39358,
+          "endMs": 39579
+        },
+        {
+          "text": " to",
+          "startMs": 39625,
+          "endMs": 39683
+        },
+        {
+          "text": " melt",
+          "startMs": 39753,
+          "endMs": 39927
+        },
+        {
+          "text": " lead.",
+          "startMs": 39985,
+          "endMs": 40496
         }
-      ]
+      ],
+      "position": "bottom"
     },
     {
       "startMs": 40496,
-      "endMs": 41274,
-      "text": "Despite its",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5271325069222614,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 41274,
-      "endMs": 41553,
-      "text": "harsh",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 41553,
-      "endMs": 42528,
-      "text": "environment,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 42528,
-      "endMs": 43213,
-      "text": "it continues",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6036401812144718,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 43213,
-      "endMs": 43828,
-      "text": "to spark our",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 43828,
-      "endMs": 45036,
-      "text": "imagination,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 45036,
-      "endMs": 45813,
-      "text": "reminding us",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 45813,
-      "endMs": 46603,
-      "text": "that mysteries",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 46603,
-      "endMs": 47334,
-      "text": "often hide in",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6491396876752396,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 47334,
-      "endMs": 48762,
-      "text": "plain sight.",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6418804091035437,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 48762,
-      "endMs": 49482,
-      "text": "People dream",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5264743831317681,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 49482,
-      "endMs": 50608,
-      "text": "that one day,",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 50608,
-      "endMs": 51305,
-      "text": "we might find",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.5898792305191535,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 51305,
-      "endMs": 51734,
-      "text": "a way to",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6063143077570282,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 51734,
-      "endMs": 52385,
-      "text": "explore its",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 0.6772011243839006,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
-        },
-        {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
-        }
-      ]
-    },
-    {
-      "startMs": 52385,
-      "endMs": 53174,
-      "text": "hidden secrets",
-      "position": "center",
-      "animations": [
-        {
-          "type": "scale",
-          "from": 1,
-          "to": 1,
-          "startMs": 0,
-          "endMs": 300
-        }
-      ]
-    },
-    {
-      "startMs": 53174,
       "endMs": 54056,
-      "text": "up close.",
-      "position": "center",
-      "animations": [
+      "captions": [
         {
-          "type": "scale",
-          "from": 0.6598653425552847,
-          "to": 1.25,
-          "startMs": 0,
-          "endMs": 300
+          "text": "Despite",
+          "startMs": 40496,
+          "endMs": 41065
         },
         {
-          "type": "scale",
-          "from": 1.25,
-          "to": 1,
-          "startMs": 300,
-          "endMs": 500
+          "text": " its",
+          "startMs": 41100,
+          "endMs": 41216
+        },
+        {
+          "text": " harsh",
+          "startMs": 41274,
+          "endMs": 41506
+        },
+        {
+          "text": " environment,",
+          "startMs": 41553,
+          "endMs": 42319
+        },
+        {
+          "text": " it",
+          "startMs": 42528,
+          "endMs": 42644
+        },
+        {
+          "text": " continues",
+          "startMs": 42690,
+          "endMs": 43166
+        },
+        {
+          "text": " to",
+          "startMs": 43213,
+          "endMs": 43271
+        },
+        {
+          "text": " spark",
+          "startMs": 43329,
+          "endMs": 43619
+        },
+        {
+          "text": " our",
+          "startMs": 43677,
+          "endMs": 43782
+        },
+        {
+          "text": " imagination,",
+          "startMs": 43828,
+          "endMs": 44710
+        },
+        {
+          "text": " reminding",
+          "startMs": 45036,
+          "endMs": 45500
+        },
+        {
+          "text": " us",
+          "startMs": 45570,
+          "endMs": 45732
+        },
+        {
+          "text": " that",
+          "startMs": 45813,
+          "endMs": 45964
+        },
+        {
+          "text": " mysteries",
+          "startMs": 46022,
+          "endMs": 46522
+        },
+        {
+          "text": " often",
+          "startMs": 46603,
+          "endMs": 46893
+        },
+        {
+          "text": " hide",
+          "startMs": 46951,
+          "endMs": 47183
+        },
+        {
+          "text": " in",
+          "startMs": 47218,
+          "endMs": 47276
+        },
+        {
+          "text": " plain",
+          "startMs": 47334,
+          "endMs": 47566
+        },
+        {
+          "text": " sight.",
+          "startMs": 47636,
+          "endMs": 48066
+        },
+        {
+          "text": " People",
+          "startMs": 48762,
+          "endMs": 49099
+        },
+        {
+          "text": " dream",
+          "startMs": 49145,
+          "endMs": 49424
+        },
+        {
+          "text": " that",
+          "startMs": 49482,
+          "endMs": 49610
+        },
+        {
+          "text": " one",
+          "startMs": 49668,
+          "endMs": 49854
+        },
+        {
+          "text": " day,",
+          "startMs": 49900,
+          "endMs": 50364
+        },
+        {
+          "text": " we",
+          "startMs": 50608,
+          "endMs": 50736
+        },
+        {
+          "text": " might",
+          "startMs": 50794,
+          "endMs": 50991
+        },
+        {
+          "text": " find",
+          "startMs": 51038,
+          "endMs": 51247
+        },
+        {
+          "text": " a",
+          "startMs": 51305,
+          "endMs": 51328
+        },
+        {
+          "text": " way",
+          "startMs": 51375,
+          "endMs": 51514
+        },
+        {
+          "text": " to",
+          "startMs": 51584,
+          "endMs": 51653
+        },
+        {
+          "text": " explore",
+          "startMs": 51734,
+          "endMs": 52164
+        },
+        {
+          "text": " its",
+          "startMs": 52210,
+          "endMs": 52338
+        },
+        {
+          "text": " hidden",
+          "startMs": 52385,
+          "endMs": 52628
+        },
+        {
+          "text": " secrets",
+          "startMs": 52698,
+          "endMs": 53128
+        },
+        {
+          "text": " up",
+          "startMs": 53174,
+          "endMs": 53279
+        },
+        {
+          "text": " close.",
+          "startMs": 53348,
+          "endMs": 54056
         }
-      ]
+      ],
+      "position": "bottom"
     }
   ],
   "audio": [
