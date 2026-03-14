@@ -33,7 +33,6 @@ dotenv.config({ quiet: true });
 interface GenerateOptions {
   apiKey?: string;
   falKey?: string;
-  elevenlabsApiKey?: string;
   title?: string;
   topic?: string;
   provider?: AiProvider;
@@ -102,8 +101,7 @@ async function generateStory(options: GenerateOptions) {
         : provider === "google"
           ? process.env.GOOGLE_GENERATIVE_AI_API_KEY
           : process.env.OPENAI_API_KEY);
-    let elevenlabsApiKey =
-      options.elevenlabsApiKey ?? process.env.ELEVENLABS_API_KEY;
+    const ttsApiKey = process.env.MODAL_TTS_URL;
 
     if (!apiKey) {
       const keyName = provider === "anthropic" ? "Anthropic" : "OpenAI";
@@ -161,19 +159,9 @@ async function generateStory(options: GenerateOptions) {
       }
     }
 
-    if (!elevenlabsApiKey) {
-      const response = await prompts({
-        type: "password",
-        name: "elevenlabsApiKey",
-        message: "Enter your ElevenLabs API key:",
-        validate: (value) =>
-          value.length > 0 || "ElevenLabs API key is required",
-      });
-      if (!response.elevenlabsApiKey) {
-        console.log(chalk.red("ElevenLabs API key is required. Exiting..."));
-        process.exit(1);
-      }
-      elevenlabsApiKey = response.elevenlabsApiKey;
+    if (!ttsApiKey) {
+      console.log(chalk.red("No Modal TTS URL found. Set MODAL_TTS_URL in .env (deploy modal/image_gen.py first)"));
+      process.exit(1);
     }
 
     let { title, topic } = options;
@@ -267,7 +255,7 @@ async function generateStory(options: GenerateOptions) {
       imagesSpinner.text = `[${i * 2 + 2}/${total}] Generating voice...`;
       const timings = await generateVoice(
         storyItem.text,
-        elevenlabsApiKey!,
+        ttsApiKey,
         contentFs.getAudioPath(storyItem.uid),
       );
       storyItem.audioTimestamps = timings;

@@ -1,8 +1,7 @@
 import z from "zod";
 import * as fs from "fs";
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { CharacterAlignmentResponseModel } from "@elevenlabs/elevenlabs-js/api";
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from "../src/lib/constants";
+import type { AudioTimestamps } from "../src/lib/types";
 import { generateObject, jsonSchema } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
@@ -21,7 +20,7 @@ export const createModel = (
     return createAnthropic({ apiKey })(modelId ?? "claude-sonnet-4-5-20251001");
   }
   if (provider === "google") {
-    return createGoogleGenerativeAI({ apiKey })(modelId ?? "gemini-2.0-flash");
+    return createGoogleGenerativeAI({ apiKey })(modelId ?? "gemini-2.5-flash");
   }
   return createOpenAI({ apiKey })(modelId ?? "gpt-4.1");
 };
@@ -45,6 +44,48 @@ export type ImageProvider =
   | { type: "fal"; falKey: string }
   | { type: "modal"; url: string };
 
+// Modal web endpoints return HTTP 303 for long-running tasks.
+// We follow the Location header and poll with GET until we get a 200.
+const modalFetchWithPolling = async <T>(
+  url: string,
+  body: object,
+  timeoutMs = 300_000,
+): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    redirect: "manual",
+  });
+
+  if (res.status === 200) {
+    return res.json() as Promise<T>;
+  }
+
+  if (res.status !== 303) {
+    throw new Error(`Modal error ${res.status}: ${await res.text()}`);
+  }
+
+  // Poll the redirect location
+  const pollUrl = res.headers.get("location");
+  if (!pollUrl) throw new Error("Modal 303 missing Location header");
+
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const poll = await fetch(pollUrl);
+    if (poll.status === 200) {
+      return poll.json() as Promise<T>;
+    }
+    if (poll.status !== 202) {
+      throw new Error(`Modal poll error ${poll.status}: ${await poll.text()}`);
+    }
+  }
+
+  throw new Error("Modal request timed out");
+};
+
 export const generateAiImage = async ({
   prompt,
   path,
@@ -63,17 +104,12 @@ export const generateAiImage = async ({
   while (attempt < maxRetries) {
     try {
       if (provider.type === "modal") {
-        const res = await fetch(provider.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt,
-            width: IMAGE_WIDTH,
-            height: IMAGE_HEIGHT,
-          }),
+        // Modal web endpoints return 303 for long-running tasks; poll until done
+        const data = await modalFetchWithPolling<{ image_b64: string }>(provider.url, {
+          prompt,
+          width: IMAGE_WIDTH,
+          height: IMAGE_HEIGHT,
         });
-        if (!res.ok) throw new Error(`Modal error: ${await res.text()}`);
-        const data = (await res.json()) as { image_b64: string };
         fs.writeFileSync(path, Buffer.from(data.image_b64, "base64"));
       } else {
         fal.config({ credentials: provider.falKey });
@@ -133,24 +169,21 @@ export const getGenerateImageDescriptionPrompt = (storyText: string) =>
 
 export const generateVoice = async (
   text: string,
-  apiKey: string,
+  ttsUrl: string,
   path: string,
-): Promise<CharacterAlignmentResponseModel> => {
-  const client = new ElevenLabsClient({
-    environment: "https://api.elevenlabs.io",
-    apiKey,
-  });
+): Promise<AudioTimestamps> => {
+  const data = await modalFetchWithPolling<{
+    audio_b64: string;
+    characters: string[];
+    characterStartTimesSeconds: number[];
+    characterEndTimesSeconds: number[];
+  }>(ttsUrl, { text, voice: "af_heart" });
 
-  const voiceId = "21m00Tcm4TlvDq8ikWAM";
+  fs.writeFileSync(path, Buffer.from(data.audio_b64, "base64"));
 
-  const data = await client.textToSpeech.convertWithTimestamps(voiceId, {
-    text,
-  });
-
-  if (!data.alignment || !data.alignment.characterEndTimesSeconds.length) {
-    throw new Error("ElevenLabs response missing timestamps");
-  }
-
-  fs.writeFileSync(path, Buffer.from(data.audioBase64, "base64"));
-  return data.alignment;
+  return {
+    characters: data.characters,
+    characterStartTimesSeconds: data.characterStartTimesSeconds,
+    characterEndTimesSeconds: data.characterEndTimesSeconds,
+  };
 };
