@@ -12,8 +12,12 @@ import { execSync } from "child_process";
 import {
   AiProvider,
   ImageProvider,
+  ImageQuality,
+  VideoStyle,
   createModel,
   generateAiImage,
+  generateVideoI2V,
+  generateVideoT2V,
   generateVoice,
   getGenerateImageDescriptionPrompt,
   getGenerateStoryPrompt,
@@ -52,6 +56,8 @@ interface GenerateOptions {
   topic?: string;
   provider?: AiProvider;
   imageProvider?: "fal" | "modal";
+  imageQuality?: ImageQuality;
+  videoStyle?: VideoStyle;
   // TTS
   voice?: string;
   // Style
@@ -111,6 +117,10 @@ class ContentFS {
     return path.join(this.getDir("audio"), `${uid}.mp3`);
   }
 
+  getVideoPath(uid: string): string {
+    return path.join(this.getDir("videos"), `${uid}.mp4`);
+  }
+
   getSlug(): string {
     return this.title
       .toLowerCase()
@@ -160,8 +170,10 @@ export async function generateStory(options: GenerateOptions) {
 
     if (options.imageProvider === "modal" || (!options.imageProvider && modalUrl)) {
       const url = modalUrl!;
-      imageProvider = { type: "modal", url };
-      console.log(chalk.blue("Images: Modal (FLUX.1-schnell)"));
+      const quality = options.imageQuality ?? "fast";
+      imageProvider = { type: "modal", url, quality };
+      const modelLabel = quality === "quality" ? "FLUX.1-dev" : "FLUX.1-schnell";
+      console.log(chalk.blue(`Images: Modal (${modelLabel})`));
     } else if (options.imageProvider === "fal" || (!options.imageProvider && falKey)) {
       imageProvider = { type: "fal", falKey: falKey! };
       console.log(chalk.blue("Images: fal.ai (Flux Pro)"));
@@ -229,9 +241,21 @@ export async function generateStory(options: GenerateOptions) {
     }
 
     const voice = options.voice ?? "af_heart";
+    const videoStyle: VideoStyle = options.videoStyle ?? "images";
+    const t2vUrl = process.env.MODAL_T2V_URL;
+    const i2vUrl = process.env.MODAL_I2V_URL;
+
+    if (videoStyle === "t2v" && !t2vUrl) {
+      console.log(chalk.red("MODAL_T2V_URL not set in .env"));
+      process.exit(1);
+    }
+    if (videoStyle === "i2v" && !i2vUrl) {
+      console.log(chalk.red("MODAL_I2V_URL not set in .env"));
+      process.exit(1);
+    }
 
     console.log(chalk.blue(`\n📖 Creating story: "${title}"`));
-    console.log(chalk.blue(`📝 Topic: ${topic} | Provider: ${provider} | Voice: ${voice}\n`));
+    console.log(chalk.blue(`📝 Topic: ${topic} | Provider: ${provider} | Voice: ${voice} | Video: ${videoStyle}\n`));
 
     const model = createModel(provider, apiKey!);
 
@@ -284,22 +308,31 @@ export async function generateStory(options: GenerateOptions) {
     }
 
     const imagesSpinner = ora("Generating images and voice...").start();
-    const total = storyWithDetails.content.length * 2;
+    // t2v skips image gen; i2v needs image then video; images is current behavior
+    const stepsPerItem = videoStyle === "t2v" ? 2 : videoStyle === "i2v" ? 3 : 2;
+    const total = storyWithDetails.content.length * stepsPerItem;
+    let step = 0;
 
     for (let i = 0; i < storyWithDetails.content.length; i++) {
       const storyItem = storyWithDetails.content[i];
 
-      imagesSpinner.text = `[${i * 2 + 1}/${total}] Generating image...`;
-      await generateAiImage({
-        prompt: storyItem.imageDescription,
-        path: contentFs.getImagePath(storyItem.uid),
-        provider: imageProvider,
-        onRetry: (attempt) => {
-          imagesSpinner.text = `[${i * 2 + 1}/${total}] Generating image (retry ${attempt})...`;
-        },
-      });
+      // Step 1: generate image (skip for t2v)
+      if (videoStyle !== "t2v") {
+        step++;
+        imagesSpinner.text = `[${step}/${total}] Generating image...`;
+        await generateAiImage({
+          prompt: storyItem.imageDescription,
+          path: contentFs.getImagePath(storyItem.uid),
+          provider: imageProvider,
+          onRetry: (attempt) => {
+            imagesSpinner.text = `[${step}/${total}] Generating image (retry ${attempt})...`;
+          },
+        });
+      }
 
-      imagesSpinner.text = `[${i * 2 + 2}/${total}] Generating voice...`;
+      // Step 2: voice (always)
+      step++;
+      imagesSpinner.text = `[${step}/${total}] Generating voice...`;
       const timings = await generateVoice(
         storyItem.text,
         ttsApiKey,
@@ -307,6 +340,31 @@ export async function generateStory(options: GenerateOptions) {
         voice,
       );
       storyItem.audioTimestamps = timings;
+
+      // Step 3: video (i2v or t2v)
+      if (videoStyle === "i2v" || videoStyle === "t2v") {
+        step++;
+        const durationMs = Math.ceil(
+          timings.characterEndTimesSeconds[timings.characterEndTimesSeconds.length - 1] * 1000,
+        );
+        imagesSpinner.text = `[${step}/${total}] Generating video (${videoStyle})...`;
+        if (videoStyle === "i2v") {
+          await generateVideoI2V(
+            contentFs.getImagePath(storyItem.uid),
+            storyItem.imageDescription,
+            i2vUrl!,
+            contentFs.getVideoPath(storyItem.uid),
+            durationMs,
+          );
+        } else {
+          await generateVideoT2V(
+            storyItem.imageDescription,
+            t2vUrl!,
+            contentFs.getVideoPath(storyItem.uid),
+            durationMs,
+          );
+        }
+      }
     }
 
     contentFs.saveDescriptor(storyWithDetails);
@@ -316,6 +374,7 @@ export async function generateStory(options: GenerateOptions) {
 
     const videoConfig: VideoConfig = {
       voice,
+      videoStyle,
       style: {
         ...(options.captionColor ? { highlightColor: options.captionColor } : {}),
         ...(options.captionSize ? { captionMaxFontSize: options.captionSize } : {}),
@@ -358,6 +417,16 @@ export async function generateStory(options: GenerateOptions) {
 
 const styleOptions = (y: ReturnType<typeof import("yargs")>) =>
   y
+    .option("image-quality", {
+      type: "string",
+      choices: ["fast", "quality"] as const,
+      description: "fast = FLUX.1-schnell (4 steps, $0.002); quality = FLUX.1-dev (28 steps, $0.01)",
+    })
+    .option("video-style", {
+      type: "string",
+      choices: ["images", "i2v", "t2v"] as const,
+      description: "images = static (default); i2v = animate each image; t2v = generate video from prompt",
+    })
     .option("voice", {
       type: "string",
       description: `TTS voice ID (default: af_heart). Options: ${KOKORO_VOICES.join(", ")}`,
@@ -446,6 +515,8 @@ yargs(hideBin(process.argv))
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
         imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
+        imageQuality: argv["image-quality"] as ImageQuality | undefined,
+        videoStyle: argv["video-style"] as VideoStyle | undefined,
         voice: argv.voice,
         captionColor: argv["caption-color"],
         captionSize: argv["caption-size"],
@@ -471,6 +542,8 @@ yargs(hideBin(process.argv))
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
         imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
+        imageQuality: argv["image-quality"] as ImageQuality | undefined,
+        videoStyle: argv["video-style"] as VideoStyle | undefined,
         voice: argv.voice,
         captionColor: argv["caption-color"],
         captionSize: argv["caption-size"],

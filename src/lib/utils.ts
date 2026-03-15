@@ -67,3 +67,6 @@ export const getImagePath = (proj: string, uid: string) =>
 
 export const getAudioPath = (proj: string, uid: string) =>
   `content/${proj}/audio/${uid}.mp3`;
+
+export const getVideoPath = (proj: string, uid: string) =>
+  `content/${proj}/videos/${uid}.mp4`;

@@ -1,13 +1,14 @@
 import {
   AbsoluteFill,
   Img,
+  OffthreadVideo,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { FPS, IMAGE_HEIGHT, IMAGE_WIDTH } from "../lib/constants";
 import { BackgroundElement } from "../lib/types";
-import { calculateBlur, getImagePath } from "../lib/utils";
+import { calculateBlur, getImagePath, getVideoPath } from "../lib/utils";
 
 const EXTRA_SCALE = 0.2;
 
@@ -20,16 +21,14 @@ export const Background: React.FC<{
   const { width, height } = useVideoConfig();
 
   const imageRatio = IMAGE_HEIGHT / IMAGE_WIDTH;
-
   const imgWidth = height;
   const imgHeight = imgWidth * imageRatio;
-  let animScale = 1 + EXTRA_SCALE;
 
+  let animScale = 1 + EXTRA_SCALE;
   const currentScaleAnim = item.animations?.find(
     (anim) =>
       anim.type === "scale" && anim.startMs <= localMs && anim.endMs >= localMs,
   );
-
   if (currentScaleAnim) {
     const progress =
       (localMs - currentScaleAnim.startMs) /
@@ -41,28 +40,37 @@ export const Background: React.FC<{
   }
 
   const imgScale = animScale;
-  const top = -(imgHeight * imgScale - height) / 2;
-  const left = -(imgWidth * imgScale - width) / 2;
+  const top  = -(imgHeight * imgScale - height) / 2;
+  const left = -(imgWidth  * imgScale - width)  / 2;
 
   const blur = calculateBlur({ item, localMs });
-  const maxBlur = 25;
+  const currentBlur = 25 * blur;
 
-  const currentBlur = maxBlur * blur;
+  const sharedStyle: React.CSSProperties = {
+    width:    imgWidth  * imgScale,
+    height:   imgHeight * imgScale,
+    position: "absolute",
+    top,
+    left,
+    filter:        `blur(${currentBlur}px)`,
+    WebkitFilter:  `blur(${currentBlur}px)`,
+    objectFit: "cover",
+  };
 
   return (
     <AbsoluteFill>
-      <Img
-        src={staticFile(getImagePath(project, item.imageUrl))}
-        style={{
-          width: imgWidth * imgScale,
-          height: imgHeight * imgScale,
-          position: "absolute",
-          top,
-          left,
-          filter: `blur(${currentBlur}px)`,
-          WebkitFilter: `blur(${currentBlur}px)`,
-        }}
-      />
+      {item.videoUrl ? (
+        <OffthreadVideo
+          src={staticFile(getVideoPath(project, item.videoUrl))}
+          style={sharedStyle}
+          muted
+        />
+      ) : (
+        <Img
+          src={staticFile(getImagePath(project, item.imageUrl ?? ""))}
+          style={sharedStyle}
+        />
+      )}
     </AbsoluteFill>
   );
 };

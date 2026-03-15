@@ -42,7 +42,10 @@ export const structuredCompletion = async <T>(
 
 export type ImageProvider =
   | { type: "fal"; falKey: string }
-  | { type: "modal"; url: string };
+  | { type: "modal"; url: string; quality?: ImageQuality };
+
+export type ImageQuality = "fast" | "quality"; // schnell vs dev
+export type VideoStyle = "images" | "i2v" | "t2v";
 
 // Modal web endpoints return HTTP 303 for long-running tasks.
 // We follow the Location header and poll with GET until we get a 200.
@@ -109,6 +112,8 @@ export const generateAiImage = async ({
           prompt,
           width: IMAGE_WIDTH,
           height: IMAGE_HEIGHT,
+          model: provider.quality === "quality" ? "dev" : "schnell",
+          steps: provider.quality === "quality" ? 28 : 4,
         });
         fs.writeFileSync(path, Buffer.from(data.image_b64, "base64"));
       } else {
@@ -187,4 +192,51 @@ export const generateVoice = async (
     characterStartTimesSeconds: data.characterStartTimesSeconds,
     characterEndTimesSeconds: data.characterEndTimesSeconds,
   };
+};
+
+// ─── num_frames helper: Wan requires 4k+1 frames ─────────────────────────────
+const toWanFrames = (durationMs: number, fps = 16, max = 81): number => {
+  const raw = Math.round((durationMs / 1000) * fps);
+  const clamped = Math.min(max, Math.max(17, raw));
+  return Math.floor((clamped - 1) / 4) * 4 + 1; // round down to nearest 4k+1
+};
+
+// ─── Text-to-video ─────────────────────────────────────────────────────────────
+export const generateVideoT2V = async (
+  prompt: string,
+  t2vUrl: string,
+  outPath: string,
+  durationMs: number,
+): Promise<void> => {
+  const data = await modalFetchWithPolling<{ video_b64: string }>(
+    t2vUrl,
+    { prompt, width: 480, height: 832, num_frames: toWanFrames(durationMs) },
+    600_000,
+  );
+  fs.mkdirSync(require("path").dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, Buffer.from(data.video_b64, "base64"));
+};
+
+// ─── Image-to-video ────────────────────────────────────────────────────────────
+export const generateVideoI2V = async (
+  imagePath: string,
+  prompt: string,
+  i2vUrl: string,
+  outPath: string,
+  durationMs: number,
+): Promise<void> => {
+  const image_b64 = fs.readFileSync(imagePath).toString("base64");
+  const data = await modalFetchWithPolling<{ video_b64: string }>(
+    i2vUrl,
+    {
+      image_b64,
+      prompt,
+      width: 480,
+      height: 832,
+      num_frames: toWanFrames(durationMs),
+    },
+    600_000,
+  );
+  fs.mkdirSync(require("path").dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, Buffer.from(data.video_b64, "base64"));
 };

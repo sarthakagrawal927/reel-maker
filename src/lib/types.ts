@@ -24,7 +24,8 @@ const ElementAnimationSchema = TimelineElementSchema.extend({
 });
 
 const BackgroundElementSchema = TimelineElementSchema.extend({
-  imageUrl: z.string(),
+  imageUrl: z.string().optional(),   // set for images / i2v source frame
+  videoUrl: z.string().optional(),   // set for i2v / t2v output clips
   enterTransition: BackgroundTransitionTypeSchema.optional(),
   exitTransition: BackgroundTransitionTypeSchema.optional(),
   animations: z.array(ElementAnimationSchema).optional(),

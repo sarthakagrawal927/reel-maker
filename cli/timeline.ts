@@ -8,9 +8,11 @@ import type {
   VideoStyle,
 } from "../src/lib/types";
 import { VideoStyleSchema } from "../src/lib/types";
+import type { VideoStyle as VideoStyleMode } from "./service";
 
 export interface VideoConfig {
   voice?: string;
+  videoStyle?: VideoStyleMode;
   style?: Partial<VideoStyle>;
   backgroundMusic?: { localPath: string; volume: number };
   render?: boolean;
@@ -96,13 +98,15 @@ export const createTimeLineFromStoryWithDetails = (
       ] * 1000,
     );
 
+    const useVideo = config?.videoStyle === "i2v" || config?.videoStyle === "t2v";
     const bgElem: BackgroundElement = {
       startMs: durationMs,
       endMs: durationMs + lenMs,
-      imageUrl: content.uid,
+      ...(config?.videoStyle !== "t2v" ? { imageUrl: content.uid } : {}),
+      ...(useVideo ? { videoUrl: content.uid } : {}),
       enterTransition: "blur",
       exitTransition: "blur",
-      animations: getBgAnimations(lenMs, zoomIn),
+      animations: useVideo ? [] : getBgAnimations(lenMs, zoomIn),
     };
 
     timeline.elements.push(bgElem);
