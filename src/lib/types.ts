@@ -49,11 +49,29 @@ const AudioElementSchema = TimelineElementSchema.extend({
   audioUrl: z.string(),
 });
 
+export const VideoStyleSchema = z.object({
+  highlightColor: z.string().default("#FFE500"),
+  captionMaxFontSize: z.number().default(120),
+  combineMs: z.number().default(1200),
+  captionPosition: z
+    .union([z.literal("top"), z.literal("bottom"), z.literal("center")])
+    .default("bottom"),
+  strokeWidth: z.number().default(15),
+  strokeColor: z.string().default("black"),
+});
+
+const BackgroundMusicSchema = z.object({
+  url: z.string(),
+  volume: z.number().min(0).max(1),
+});
+
 const TimelineSchema = z.object({
   shortTitle: z.string(),
   elements: z.array(BackgroundElementSchema),
   text: z.array(TextElementSchema),
   audio: z.array(AudioElementSchema),
+  style: VideoStyleSchema.optional(),
+  backgroundMusic: BackgroundMusicSchema.optional(),
 });
 
 export type BackgroundTransitionType = z.infer<
@@ -66,11 +84,14 @@ export type BackgroundElement = z.infer<typeof BackgroundElementSchema>;
 export type CaptionToken = z.infer<typeof CaptionTokenSchema>;
 export type TextElement = z.infer<typeof TextElementSchema>;
 export type AudioElement = z.infer<typeof AudioElementSchema>;
+export type VideoStyle = z.infer<typeof VideoStyleSchema>;
+export type BackgroundMusic = z.infer<typeof BackgroundMusicSchema>;
 export type Timeline = z.infer<typeof TimelineSchema>;
 
 export {
   AudioElementSchema,
   BackgroundElementSchema,
+  BackgroundMusicSchema,
   BackgroundTransitionTypeSchema,
   CaptionTokenSchema,
   ElementAnimationSchema,

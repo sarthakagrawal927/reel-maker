@@ -8,6 +8,7 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "gen": "bun cli/cli.ts",
+    "batch": "bun cli/batch.ts",
     "render": "remotion render"
   },
   "repository": {},

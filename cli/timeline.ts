@@ -5,7 +5,16 @@ import type {
   StoryMetadataWithDetails,
   TextElement,
   Timeline,
+  VideoStyle,
 } from "../src/lib/types";
+import { VideoStyleSchema } from "../src/lib/types";
+
+export interface VideoConfig {
+  voice?: string;
+  style?: Partial<VideoStyle>;
+  backgroundMusic?: { localPath: string; volume: number };
+  render?: boolean;
+}
 
 const characterTimestampsToWordCaptions = (
   characters: string[],
@@ -53,12 +62,26 @@ const characterTimestampsToWordCaptions = (
 
 export const createTimeLineFromStoryWithDetails = (
   storyWithDetails: StoryMetadataWithDetails,
+  config?: VideoConfig,
 ): Timeline => {
+  const style = config?.style
+    ? VideoStyleSchema.parse({ ...config.style })
+    : undefined;
+
   const timeline: Timeline = {
     elements: [],
     text: [],
     audio: [],
     shortTitle: storyWithDetails.shortTitle,
+    ...(style ? { style } : {}),
+    ...(config?.backgroundMusic
+      ? {
+          backgroundMusic: {
+            url: "bg-music.mp3",
+            volume: config.backgroundMusic.volume,
+          },
+        }
+      : {}),
   };
 
   let durationMs = 0;
@@ -101,7 +124,7 @@ export const createTimeLineFromStoryWithDetails = (
       startMs: durationMs,
       endMs: durationMs + lenMs,
       captions,
-      position: "bottom",
+      position: style?.captionPosition ?? "bottom",
     };
 
     timeline.text.push(textElem);

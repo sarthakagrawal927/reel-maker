@@ -10,13 +10,16 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import type { VideoStyle } from "../lib/types";
 
-const HIGHLIGHT_COLOR = "#FFE500";
+const { fontFamily } = loadFont();
 
-export const Word: React.FC<{ page: TikTokPage }> = ({ page }) => {
+export const Word: React.FC<{ page: TikTokPage; style: VideoStyle }> = ({
+  page,
+  style,
+}) => {
   const frame = useCurrentFrame();
-  const { fps, width } = useVideoConfig();
-  const { fontFamily } = loadFont();
+  const { fps, width, height } = useVideoConfig();
   const timeInMs = (frame / fps) * 1000;
 
   const enter = spring({
@@ -33,22 +36,27 @@ export const Word: React.FC<{ page: TikTokPage }> = ({ page }) => {
     textTransform: "uppercase",
   });
 
-  const fontSize = Math.min(120, fittedText.fontSize);
+  const fontSize = Math.min(style.captionMaxFontSize, fittedText.fontSize);
+
+  const positionStyle: React.CSSProperties =
+    style.captionPosition === "top"
+      ? { top: 200, bottom: undefined, height: 150 }
+      : style.captionPosition === "center"
+        ? { top: height / 2 - 75, bottom: undefined, height: 150 }
+        : { top: undefined, bottom: 350, height: 150 };
 
   return (
     <AbsoluteFill
       style={{
         justifyContent: "center",
         alignItems: "center",
-        top: undefined,
-        bottom: 350,
-        height: 150,
+        ...positionStyle,
       }}
     >
       <div
         style={{
           fontSize,
-          WebkitTextStroke: "15px black",
+          WebkitTextStroke: `${style.strokeWidth}px ${style.strokeColor}`,
           paintOrder: "stroke fill",
           transform: makeTransform([
             scale(interpolate(enter, [0, 1], [0.8, 1])),
@@ -67,7 +75,7 @@ export const Word: React.FC<{ page: TikTokPage }> = ({ page }) => {
               style={{
                 display: "inline",
                 whiteSpace: "pre",
-                color: active ? HIGHLIGHT_COLOR : "white",
+                color: active ? style.highlightColor : "white",
               }}
             >
               {token.text}

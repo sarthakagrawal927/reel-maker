@@ -3,7 +3,7 @@ import { Audio } from "@remotion/media";
 import { AbsoluteFill, Sequence, staticFile, useVideoConfig } from "remotion";
 import { z } from "zod";
 import { FPS, INTRO_DURATION } from "../lib/constants";
-import { TimelineSchema } from "../lib/types";
+import { TimelineSchema, VideoStyleSchema } from "../lib/types";
 import { calculateFrameTiming, getAudioPath } from "../lib/utils";
 import { Background } from "./Background";
 import Subtitle from "./Subtitle";
@@ -14,6 +14,8 @@ export const aiVideoSchema = z.object({
 
 const { fontFamily } = loadFont();
 
+const DEFAULT_STYLE = VideoStyleSchema.parse({});
+
 export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
   timeline,
 }) => {
@@ -21,7 +23,8 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
     throw new Error("Expected timeline to be fetched");
   }
 
-  const { id } = useVideoConfig();
+  const { id, durationInFrames } = useVideoConfig();
+  const style = timeline.style ?? DEFAULT_STYLE;
 
   return (
     <AbsoluteFill style={{ backgroundColor: "black" }}>
@@ -86,7 +89,11 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
             from={startFrame}
             durationInFrames={duration}
           >
-            <Subtitle captions={element.captions} sceneStartMs={element.startMs} />
+            <Subtitle
+              captions={element.captions}
+              sceneStartMs={element.startMs}
+              style={style}
+            />
           </Sequence>
         );
       })}
@@ -109,6 +116,18 @@ export const AIVideo: React.FC<z.infer<typeof aiVideoSchema>> = ({
           </Sequence>
         );
       })}
+
+      {timeline.backgroundMusic && (
+        <Sequence from={0} durationInFrames={durationInFrames}>
+          <Audio
+            src={staticFile(
+              `content/${id}/${timeline.backgroundMusic.url}`,
+            )}
+            volume={timeline.backgroundMusic.volume}
+            loop
+          />
+        </Sequence>
+      )}
     </AbsoluteFill>
   );
 };

@@ -171,13 +171,14 @@ export const generateVoice = async (
   text: string,
   ttsUrl: string,
   path: string,
+  voice = "af_heart",
 ): Promise<AudioTimestamps> => {
   const data = await modalFetchWithPolling<{
     audio_b64: string;
     characters: string[];
     characterStartTimesSeconds: number[];
     characterEndTimesSeconds: number[];
-  }>(ttsUrl, { text, voice: "af_heart" });
+  }>(ttsUrl, { text, voice });
 
   fs.writeFileSync(path, Buffer.from(data.audio_b64, "base64"));
 

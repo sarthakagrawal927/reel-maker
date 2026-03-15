@@ -2,15 +2,14 @@ import type { Caption } from "@remotion/captions";
 import { createTikTokStyleCaptions } from "@remotion/captions";
 import React from "react";
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
-import type { CaptionToken } from "../lib/types";
+import type { CaptionToken, VideoStyle } from "../lib/types";
 import { Word } from "./Word";
-
-const COMBINE_MS = 1200;
 
 const Subtitle: React.FC<{
   captions: CaptionToken[];
   sceneStartMs: number;
-}> = ({ captions, sceneStartMs }) => {
+  style: VideoStyle;
+}> = ({ captions, sceneStartMs, style }) => {
   const { fps } = useVideoConfig();
 
   const remotionCaptions: Caption[] = captions.map((c) => ({
@@ -23,7 +22,7 @@ const Subtitle: React.FC<{
 
   const { pages } = createTikTokStyleCaptions({
     captions: remotionCaptions,
-    combineTokensWithinMilliseconds: COMBINE_MS,
+    combineTokensWithinMilliseconds: style.combineMs,
   });
 
   return (
@@ -42,7 +41,7 @@ const Subtitle: React.FC<{
             from={startFrame}
             durationInFrames={durationInFrames}
           >
-            <Word page={page} />
+            <Word page={page} style={style} />
           </Sequence>
         );
       })}
