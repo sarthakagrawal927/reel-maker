@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import z from "zod";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import prompts from "prompts";
@@ -13,18 +14,18 @@ import {
   AiProvider,
   ImageProvider,
   ImageQuality,
+  TtsProvider,
   VideoStyle,
-  createModel,
+  createGatewayModelWithFallback,
   generateAiImage,
+  generateLipSync,
   generateVideoI2V,
   generateVideoT2V,
   generateVoice,
   getGenerateImageDescriptionPrompt,
   getGenerateStoryPrompt,
-  structuredCompletion,
 } from "./service";
 import {
-  ContentItemWithDetails,
   StoryMetadataWithDetails,
   StoryScript,
   StoryWithImages,
@@ -55,7 +56,7 @@ interface GenerateOptions {
   title?: string;
   topic?: string;
   provider?: AiProvider;
-  imageProvider?: "fal" | "modal";
+  imageProvider?: "hf" | "stablehorde" | "fal" | "modal";
   imageQuality?: ImageQuality;
   videoStyle?: VideoStyle;
   // TTS
@@ -70,6 +71,8 @@ interface GenerateOptions {
   // Music
   music?: string;
   musicVolume?: number;
+  // Talking head
+  avatar?: string;
   // Render
   render?: boolean;
 }
@@ -87,6 +90,16 @@ class ContentFS {
     const dirPath = this.getDir();
     const filePath = path.join(dirPath, "descriptor.json");
     fs.writeFileSync(filePath, JSON.stringify(descriptor, null, 2));
+  }
+
+  loadDescriptor(): StoryMetadataWithDetails | null {
+    const filePath = path.join(this.getDir(), "descriptor.json");
+    if (!fs.existsSync(filePath)) return null;
+    try {
+      return JSON.parse(fs.readFileSync(filePath, "utf-8")) as StoryMetadataWithDetails;
+    } catch {
+      return null;
+    }
   }
 
   saveTimeline(timeline: Timeline) {
@@ -131,29 +144,13 @@ class ContentFS {
 
 export async function generateStory(options: GenerateOptions) {
   try {
-    const provider: AiProvider =
-      options.provider ??
-      (process.env.ANTHROPIC_API_KEY
-        ? "anthropic"
-        : process.env.GOOGLE_GENERATIVE_AI_API_KEY
-          ? "google"
-          : "openai");
-
-    let apiKey =
-      options.apiKey ??
-      (provider === "anthropic"
-        ? process.env.ANTHROPIC_API_KEY
-        : provider === "google"
-          ? process.env.GOOGLE_GENERATIVE_AI_API_KEY
-          : process.env.OPENAI_API_KEY);
-    const ttsApiKey = process.env.MODAL_TTS_URL;
+    let apiKey = options.apiKey ?? process.env.FREE_GATEWAY_API_KEY;
 
     if (!apiKey) {
-      const keyName = provider === "anthropic" ? "Anthropic" : "OpenAI";
       const response = await prompts({
         type: "password",
         name: "apiKey",
-        message: `Enter your ${keyName} API key:`,
+        message: "Enter your Free Gateway API key:",
         validate: (value) => value.length > 0 || "API key is required",
       });
       if (!response.apiKey) {
@@ -163,12 +160,20 @@ export async function generateStory(options: GenerateOptions) {
       apiKey = response.apiKey;
     }
 
-    // Resolve image provider: Modal (free tier) > fal.ai > prompt
+    // Resolve image provider: HF > Stable Horde > Modal > fal.ai > prompt
     let imageProvider: ImageProvider;
+    const hfToken = process.env.HF_TOKEN;
     const modalUrl = process.env.MODAL_IMAGE_GEN_URL;
     const falKey = options.falKey ?? process.env.FAL_KEY;
+    const stableHordeKey = process.env.STABLE_HORDE_API_KEY;
 
-    if (options.imageProvider === "modal" || (!options.imageProvider && modalUrl)) {
+    if (options.imageProvider === "hf" || (!options.imageProvider && hfToken)) {
+      imageProvider = { type: "hf", token: hfToken! };
+      console.log(chalk.blue("Images: HuggingFace (FLUX.1-schnell, free)"));
+    } else if (options.imageProvider === "stablehorde" || (!options.imageProvider && stableHordeKey)) {
+      imageProvider = { type: "stablehorde", apiKey: stableHordeKey! };
+      console.log(chalk.blue("Images: Stable Horde (FLUX.1-schnell, free, slow queue)"));
+    } else if (options.imageProvider === "modal" || (!options.imageProvider && modalUrl)) {
       const url = modalUrl!;
       const quality = options.imageQuality ?? "fast";
       imageProvider = { type: "modal", url, quality };
@@ -183,11 +188,29 @@ export async function generateStory(options: GenerateOptions) {
         name: "choice",
         message: "Choose image provider:",
         choices: [
+          { title: "Stable Horde — FLUX.1-schnell (free, needs key)", value: "stablehorde" },
+          { title: "HuggingFace — FLUX.1-schnell (free, needs HF_TOKEN)", value: "hf" },
+          { title: "Modal — FLUX.1-schnell (~$0.002/image)", value: "modal" },
           { title: "fal.ai — Flux Pro ($0.03/image)", value: "fal" },
-          { title: "Modal — FLUX.1-schnell (~$0.002/image, requires setup)", value: "modal" },
         ],
       });
-      if (choice === "modal") {
+      if (choice === "stablehorde") {
+        const { key } = await prompts({
+          type: "password",
+          name: "key",
+          message: "Enter your Stable Horde API key:",
+          validate: (v: string) => v.length > 0 || "Key is required",
+        });
+        imageProvider = { type: "stablehorde", apiKey: key };
+      } else if (choice === "hf") {
+        const { token } = await prompts({
+          type: "password",
+          name: "token",
+          message: "Enter your HuggingFace token:",
+          validate: (v: string) => v.startsWith("hf_") || "Must start with hf_",
+        });
+        imageProvider = { type: "hf", token };
+      } else if (choice === "modal") {
         const { url } = await prompts({
           type: "text",
           name: "url",
@@ -206,10 +229,10 @@ export async function generateStory(options: GenerateOptions) {
       }
     }
 
-    if (!ttsApiKey) {
-      console.log(chalk.red("No Modal TTS URL found. Set MODAL_TTS_URL in .env (deploy modal/image_gen.py first)"));
-      process.exit(1);
-    }
+    // Resolve TTS: Edge TTS (Microsoft, free, no key) > Modal (Kokoro-82M)
+    let ttsProvider: TtsProvider;
+    ttsProvider = { type: "edge" };
+    console.log(chalk.blue("TTS: Microsoft Edge (free, no key)"));
 
     let { title, topic } = options;
 
@@ -240,10 +263,11 @@ export async function generateStory(options: GenerateOptions) {
       topic = response.topic;
     }
 
-    const voice = options.voice ?? "af_heart";
+    const voice = options.voice ?? "en-GB-SoniaNeural";
     const videoStyle: VideoStyle = options.videoStyle ?? "images";
     const t2vUrl = process.env.MODAL_T2V_URL;
     const i2vUrl = process.env.MODAL_I2V_URL;
+    const lipsyncUrl = process.env.MODAL_LIPSYNC_URL;
 
     if (videoStyle === "t2v" && !t2vUrl) {
       console.log(chalk.red("MODAL_T2V_URL not set in .env"));
@@ -253,49 +277,56 @@ export async function generateStory(options: GenerateOptions) {
       console.log(chalk.red("MODAL_I2V_URL not set in .env"));
       process.exit(1);
     }
-
-    console.log(chalk.blue(`\n📖 Creating story: "${title}"`));
-    console.log(chalk.blue(`📝 Topic: ${topic} | Provider: ${provider} | Voice: ${voice} | Video: ${videoStyle}\n`));
-
-    const model = createModel(provider, apiKey!);
-
-    const storyWithDetails: StoryMetadataWithDetails = {
-      shortTitle: title!,
-      content: [],
-    };
-
-    const storySpinner = ora("Generating story...").start();
-    const storyRes = await structuredCompletion(
-      getGenerateStoryPrompt(title!, topic!),
-      StoryScript,
-      model,
-    );
-    storySpinner.succeed(chalk.green("Story generated!"));
-
-    const descriptionsSpinner = ora("Generating image descriptions...").start();
-    const storyWithImagesRes = await structuredCompletion(
-      getGenerateImageDescriptionPrompt(storyRes.text),
-      StoryWithImages,
-      model,
-    );
-    descriptionsSpinner.succeed(chalk.green("Image descriptions generated!"));
-
-    for (const item of storyWithImagesRes.result) {
-      const contentWithDetails: ContentItemWithDetails = {
-        text: item.text,
-        imageDescription: item.imageDescription,
-        uid: uuidv4(),
-        audioTimestamps: {
-          characters: [],
-          characterStartTimesSeconds: [],
-          characterEndTimesSeconds: [],
-        },
-      };
-      storyWithDetails.content.push(contentWithDetails);
+    if (videoStyle === "talking-head" && !lipsyncUrl) {
+      console.log(chalk.red("MODAL_LIPSYNC_URL not set in .env (deploy modal/latentsync.py first)"));
+      process.exit(1);
     }
 
+    console.log(chalk.blue(`\n📖 Creating story: "${title}"`));
+    console.log(chalk.blue(`📝 Topic: ${topic} | Voice: ${voice} | Video: ${videoStyle}\n`));
+
     const contentFs = new ContentFS(title!);
-    contentFs.saveDescriptor(storyWithDetails);
+    const runCompletion = <T>(prompt: string, schema: z.ZodType<T>) =>
+      createGatewayModelWithFallback(prompt, schema, apiKey!);
+
+    // ── Cache: reuse existing descriptor if already generated ───────────────
+    let storyWithDetails: StoryMetadataWithDetails;
+    const cachedDescriptor = contentFs.loadDescriptor();
+    if (cachedDescriptor) {
+      console.log(chalk.yellow("♻️  Using cached story & image descriptions"));
+      storyWithDetails = cachedDescriptor;
+    } else {
+      storyWithDetails = { shortTitle: title!, content: [] };
+
+      const storySpinner = ora("Generating story...").start();
+      const storyRes = await runCompletion(
+        getGenerateStoryPrompt(title!, topic!),
+        StoryScript,
+      );
+      storySpinner.succeed(chalk.green("Story generated!"));
+
+      const descriptionsSpinner = ora("Generating image descriptions...").start();
+      const storyWithImagesRes = await runCompletion(
+        getGenerateImageDescriptionPrompt(storyRes.text),
+        StoryWithImages,
+      );
+      descriptionsSpinner.succeed(chalk.green("Image descriptions generated!"));
+
+      for (const item of storyWithImagesRes.result) {
+        storyWithDetails.content.push({
+          text: item.text,
+          imageDescription: item.imageDescription,
+          uid: uuidv4(),
+          audioTimestamps: {
+            characters: [],
+            characterStartTimesSeconds: [],
+            characterEndTimesSeconds: [],
+          },
+        });
+      }
+
+      contentFs.saveDescriptor(storyWithDetails);
+    }
 
     // Copy background music if provided
     if (options.music) {
@@ -308,61 +339,89 @@ export async function generateStory(options: GenerateOptions) {
     }
 
     const imagesSpinner = ora("Generating images and voice...").start();
-    // t2v skips image gen; i2v needs image then video; images is current behavior
-    const stepsPerItem = videoStyle === "t2v" ? 2 : videoStyle === "i2v" ? 3 : 2;
+    // talking-head with --avatar: 2 steps (voice + lipsync); without avatar: 3 (image + voice + lipsync)
+    // t2v: 2 steps (voice + video); i2v: 3 (image + voice + video); images: 2 (image + voice)
+    const stepsPerItem =
+      videoStyle === "t2v" ? 2
+      : videoStyle === "i2v" ? 3
+      : videoStyle === "talking-head" ? (options.avatar ? 2 : 3)
+      : 2;
     const total = storyWithDetails.content.length * stepsPerItem;
     let step = 0;
 
     for (let i = 0; i < storyWithDetails.content.length; i++) {
       const storyItem = storyWithDetails.content[i];
 
-      // Step 1: generate image (skip for t2v)
-      if (videoStyle !== "t2v") {
+      // Step 1: generate image (skip for t2v; talking-head skips if --avatar supplied)
+      if (videoStyle !== "t2v" && !(videoStyle === "talking-head" && options.avatar)) {
         step++;
-        imagesSpinner.text = `[${step}/${total}] Generating image...`;
-        await generateAiImage({
-          prompt: storyItem.imageDescription,
-          path: contentFs.getImagePath(storyItem.uid),
-          provider: imageProvider,
-          onRetry: (attempt) => {
-            imagesSpinner.text = `[${step}/${total}] Generating image (retry ${attempt})...`;
-          },
-        });
+        const imgPath = contentFs.getImagePath(storyItem.uid);
+        if (fs.existsSync(imgPath)) {
+          imagesSpinner.text = `[${step}/${total}] Image cached, skipping...`;
+        } else {
+          imagesSpinner.text = `[${step}/${total}] Generating image...`;
+          await generateAiImage({
+            prompt: storyItem.imageDescription,
+            path: imgPath,
+            provider: imageProvider,
+            onRetry: (attempt) => {
+              imagesSpinner.text = `[${step}/${total}] Generating image (retry ${attempt})...`;
+            },
+          });
+        }
       }
 
       // Step 2: voice (always)
       step++;
-      imagesSpinner.text = `[${step}/${total}] Generating voice...`;
-      const timings = await generateVoice(
-        storyItem.text,
-        ttsApiKey,
-        contentFs.getAudioPath(storyItem.uid),
-        voice,
-      );
-      storyItem.audioTimestamps = timings;
+      const audioPath = contentFs.getAudioPath(storyItem.uid);
+      let timings = storyItem.audioTimestamps;
+      const hasAudio = fs.existsSync(audioPath) &&
+        timings.characters.length > 0;
+      if (hasAudio) {
+        imagesSpinner.text = `[${step}/${total}] Voice cached, skipping...`;
+      } else {
+        imagesSpinner.text = `[${step}/${total}] Generating voice...`;
+        timings = await generateVoice(storyItem.text, ttsProvider, audioPath, voice);
+        storyItem.audioTimestamps = timings;
+      }
 
-      // Step 3: video (i2v or t2v)
-      if (videoStyle === "i2v" || videoStyle === "t2v") {
+      // Step 3: video (i2v, t2v, or talking-head)
+      if (videoStyle === "i2v" || videoStyle === "t2v" || videoStyle === "talking-head") {
         step++;
-        const durationMs = Math.ceil(
-          timings.characterEndTimesSeconds[timings.characterEndTimesSeconds.length - 1] * 1000,
-        );
-        imagesSpinner.text = `[${step}/${total}] Generating video (${videoStyle})...`;
-        if (videoStyle === "i2v") {
-          await generateVideoI2V(
-            contentFs.getImagePath(storyItem.uid),
-            storyItem.imageDescription,
-            i2vUrl!,
-            contentFs.getVideoPath(storyItem.uid),
-            durationMs,
-          );
+        const videoPath = contentFs.getVideoPath(storyItem.uid);
+        if (fs.existsSync(videoPath)) {
+          imagesSpinner.text = `[${step}/${total}] Video cached, skipping...`;
         } else {
-          await generateVideoT2V(
-            storyItem.imageDescription,
-            t2vUrl!,
-            contentFs.getVideoPath(storyItem.uid),
-            durationMs,
+          const durationMs = Math.ceil(
+            timings.characterEndTimesSeconds[timings.characterEndTimesSeconds.length - 1] * 1000,
           );
+          imagesSpinner.text = `[${step}/${total}] Generating video (${videoStyle})...`;
+          if (videoStyle === "i2v") {
+            await generateVideoI2V(
+              contentFs.getImagePath(storyItem.uid),
+              storyItem.imageDescription,
+              i2vUrl!,
+              videoPath,
+              durationMs,
+            );
+          } else if (videoStyle === "t2v") {
+            await generateVideoT2V(
+              storyItem.imageDescription,
+              t2vUrl!,
+              videoPath,
+              durationMs,
+            );
+          } else {
+            const avatarPath = options.avatar
+              ? path.resolve(options.avatar)
+              : contentFs.getImagePath(storyItem.uid);
+            await generateLipSync(
+              avatarPath,
+              audioPath,
+              lipsyncUrl!,
+              videoPath,
+            );
+          }
         }
       }
     }
@@ -424,12 +483,16 @@ const styleOptions = (y: ReturnType<typeof import("yargs")>) =>
     })
     .option("video-style", {
       type: "string",
-      choices: ["images", "i2v", "t2v"] as const,
-      description: "images = static (default); i2v = animate each image; t2v = generate video from prompt",
+      choices: ["images", "i2v", "t2v", "talking-head"] as const,
+      description: "images = static (default); i2v = animate each image; t2v = generate video from prompt; talking-head = lip-synced avatar",
+    })
+    .option("avatar", {
+      type: "string",
+      description: "Path to portrait image for talking-head mode (optional; generates one if omitted)",
     })
     .option("voice", {
       type: "string",
-      description: `TTS voice ID (default: af_heart). Options: ${KOKORO_VOICES.join(", ")}`,
+      description: `TTS voice ID (default: en-GB-SoniaNeural). Edge TTS voices recommended (e.g. en-US-JennyNeural, en-GB-LibbyNeural). Kokoro options: ${KOKORO_VOICES.join(", ")}`,
     })
     .option("caption-color", {
       type: "string",
@@ -483,8 +546,8 @@ const commonOptions = (y: ReturnType<typeof import("yargs")>) =>
     })
     .option("image-provider", {
       type: "string",
-      choices: ["fal", "modal"] as const,
-      description: "Image generation provider (default: auto-detect from env)",
+      choices: ["hf", "stablehorde", "modal", "fal"] as const,
+      description: "Image generation provider (default: hf → stablehorde → modal → fal)",
     })
     .option("title", {
       alias: "t",
@@ -498,8 +561,7 @@ const commonOptions = (y: ReturnType<typeof import("yargs")>) =>
     })
     .option("provider", {
       type: "string",
-      choices: ["openai", "anthropic", "google"] as const,
-      description: "AI provider for story generation",
+      description: "AI provider for story generation (only 'gateway' supported)",
     });
 
 yargs(hideBin(process.argv))
@@ -514,10 +576,11 @@ yargs(hideBin(process.argv))
         title: argv.title,
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
-        imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
+        imageProvider: argv["image-provider"] as "hf" | "stablehorde" | "fal" | "modal" | undefined,
         imageQuality: argv["image-quality"] as ImageQuality | undefined,
         videoStyle: argv["video-style"] as VideoStyle | undefined,
         voice: argv.voice,
+        avatar: argv.avatar,
         captionColor: argv["caption-color"],
         captionSize: argv["caption-size"],
         captionPosition: argv["caption-position"] as "top" | "bottom" | "center" | undefined,
@@ -541,10 +604,11 @@ yargs(hideBin(process.argv))
         title: argv.title,
         topic: argv.topic,
         provider: argv.provider as AiProvider | undefined,
-        imageProvider: argv["image-provider"] as "fal" | "modal" | undefined,
+        imageProvider: argv["image-provider"] as "hf" | "stablehorde" | "fal" | "modal" | undefined,
         imageQuality: argv["image-quality"] as ImageQuality | undefined,
         videoStyle: argv["video-style"] as VideoStyle | undefined,
         voice: argv.voice,
+        avatar: argv.avatar,
         captionColor: argv["caption-color"],
         captionSize: argv["caption-size"],
         captionPosition: argv["caption-position"] as "top" | "bottom" | "center" | undefined,

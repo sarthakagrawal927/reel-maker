@@ -1,11 +1,12 @@
 """
-Unified Modal endpoint: image gen (FLUX schnell/dev) + video gen (Wan T2V/I2V) + TTS.
+Unified Modal endpoint: image gen (FLUX schnell/dev) + video gen (Wan T2V/I2V) + TTS + LatentSync.
 
 Routes:
   POST /generate              image_b64          model="schnell"|"dev", steps, seed
   POST /generate-video-t2v    video_b64          prompt-only
   POST /generate-video-i2v    video_b64          image_b64 + prompt
   POST /tts                   audio+timestamps
+  POST /lipsync               video_b64          image_b64 + audio_b64
   GET  /health
 
 Setup:
@@ -17,10 +18,14 @@ Setup:
   MODAL_TTS_URL=https://<you>--reel-maker-serve.modal.run/tts
   MODAL_T2V_URL=https://<you>--reel-maker-serve.modal.run/generate-video-t2v
   MODAL_I2V_URL=https://<you>--reel-maker-serve.modal.run/generate-video-i2v
+  MODAL_LIPSYNC_URL=https://<you>--reel-maker-serve.modal.run/lipsync
 """
 
 import io
+import os
 import base64
+import subprocess
+import tempfile
 from typing import Optional
 from pydantic import BaseModel
 import modal
@@ -38,9 +43,14 @@ WAN_CACHE      = "/cache/wan"
 
 # ─── Secrets / Volumes ────────────────────────────────────────────────────────
 hf_secret    = modal.Secret.from_name("huggingface")
-flux_volume  = modal.Volume.from_name("reel-maker-flux-cache",  create_if_missing=True)
-wan_volume   = modal.Volume.from_name("reel-maker-wan-cache",   create_if_missing=True)
-tts_volume   = modal.Volume.from_name("reel-maker-tts-cache",   create_if_missing=True)
+flux_volume  = modal.Volume.from_name("reel-maker-flux-cache",   create_if_missing=True)
+wan_volume   = modal.Volume.from_name("reel-maker-wan-cache",    create_if_missing=True)
+tts_volume   = modal.Volume.from_name("reel-maker-tts-cache",    create_if_missing=True)
+lsync_volume = modal.Volume.from_name("reel-maker-lsync-cache",  create_if_missing=True)
+
+LSYNC_REPO_DIR  = "/latentsync"
+LSYNC_CACHE_DIR = "/cache/latentsync"
+LSYNC_CKPT_DIR  = f"{LSYNC_REPO_DIR}/checkpoints"
 
 
 # ─── Shared pip deps ──────────────────────────────────────────────────────────
@@ -377,6 +387,100 @@ class TTSGenerator:
 
 
 # ════════════════════════════════════════════════════════════════════════════════
+# LATENTSYNC TALKING HEAD
+# ════════════════════════════════════════════════════════════════════════════════
+
+def download_latentsync():
+    import os
+    from huggingface_hub import hf_hub_download
+    token = os.environ.get("HF_TOKEN")
+    os.makedirs(LSYNC_CKPT_DIR, exist_ok=True)
+    hf_hub_download(
+        repo_id="ByteDance/LatentSync-1.5",
+        filename="latentsync_unet.pt",
+        local_dir=LSYNC_CKPT_DIR,
+        token=token,
+    )
+    print("LatentSync checkpoint downloaded.")
+
+
+latentsync_image = (
+    modal.Image.debian_slim(python_version="3.10")
+    .apt_install("git", "ffmpeg", "libsm6", "libxext6", "libglib2.0-0")
+    .pip_install(
+        "torch==2.1.2", "torchvision==0.16.2", "torchaudio==2.1.2",
+        extra_index_url="https://download.pytorch.org/whl/cu121",
+    )
+    .run_commands(
+        f"git clone https://github.com/bytedance/LatentSync.git {LSYNC_REPO_DIR}",
+        f"pip install -r {LSYNC_REPO_DIR}/requirements.txt",
+    )
+    .pip_install("huggingface_hub")
+    .run_function(
+        download_latentsync,
+        secrets=[hf_secret],
+        volumes={LSYNC_CACHE_DIR: lsync_volume},
+    )
+)
+
+
+class LipSyncRequest(BaseModel):
+    image_b64: str
+    audio_b64: str
+
+
+@app.cls(
+    image=latentsync_image,
+    gpu="A10G",
+    volumes={LSYNC_CACHE_DIR: lsync_volume},
+    timeout=300,
+)
+class LatentSyncGenerator:
+
+    @modal.method()
+    def generate(self, image_b64: str, audio_b64: str) -> str:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_path   = os.path.join(tmpdir, "face.png")
+            audio_path = os.path.join(tmpdir, "audio.wav")
+            video_path = os.path.join(tmpdir, "face.mp4")
+            out_path   = os.path.join(tmpdir, "out.mp4")
+
+            with open(img_path, "wb") as f:
+                f.write(base64.b64decode(image_b64))
+            with open(audio_path, "wb") as f:
+                f.write(base64.b64decode(audio_b64))
+
+            # Loop static portrait to audio duration
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-loop", "1", "-i", img_path,
+                "-i", audio_path,
+                "-c:v", "libx264", "-tune", "stillimage",
+                "-c:a", "aac", "-b:a", "192k",
+                "-pix_fmt", "yuv420p",
+                "-shortest", video_path,
+            ], check=True, capture_output=True)
+
+            result = subprocess.run([
+                "python", "-m", "scripts.inference",
+                "--unet_config_path",    f"{LSYNC_REPO_DIR}/configs/unet/second_stage.yaml",
+                "--inference_ckpt_path", f"{LSYNC_CKPT_DIR}/latentsync_unet.pt",
+                "--guidance_scale",      "2.0",
+                "--video_path",          video_path,
+                "--audio_path",          audio_path,
+                "--video_out_path",      out_path,
+            ], capture_output=True, cwd=LSYNC_REPO_DIR)
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"LatentSync failed:\n{result.stderr.decode()}"
+                )
+
+            with open(out_path, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+
+
+# ════════════════════════════════════════════════════════════════════════════════
 # UNIFIED ASGI ENDPOINT
 # ════════════════════════════════════════════════════════════════════════════════
 
@@ -397,6 +501,7 @@ def serve():
     t2v   = WanT2VGenerator()
     i2v   = WanI2VGenerator()
     tts   = TTSGenerator()
+    lsync = LatentSyncGenerator()
 
     @web.post("/generate")
     async def generate_image(req: GenerateRequest):
@@ -435,6 +540,14 @@ def serve():
         try:
             result = await tts.synthesize.remote.aio(req.text, req.voice)
             return JSONResponse(result)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @web.post("/lipsync")
+    async def lipsync(req: LipSyncRequest):
+        try:
+            video_b64 = await lsync.generate.remote.aio(req.image_b64, req.audio_b64)
+            return JSONResponse({"video_b64": video_b64})
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 

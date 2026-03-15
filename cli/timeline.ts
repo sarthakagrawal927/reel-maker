@@ -98,11 +98,11 @@ export const createTimeLineFromStoryWithDetails = (
       ] * 1000,
     );
 
-    const useVideo = config?.videoStyle === "i2v" || config?.videoStyle === "t2v";
+    const useVideo = config?.videoStyle === "i2v" || config?.videoStyle === "t2v" || config?.videoStyle === "talking-head";
     const bgElem: BackgroundElement = {
       startMs: durationMs,
       endMs: durationMs + lenMs,
-      ...(config?.videoStyle !== "t2v" ? { imageUrl: content.uid } : {}),
+      ...(config?.videoStyle !== "t2v" && config?.videoStyle !== "talking-head" ? { imageUrl: content.uid } : {}),
       ...(useVideo ? { videoUrl: content.uid } : {}),
       enterTransition: "blur",
       exitTransition: "blur",
