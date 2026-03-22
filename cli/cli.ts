@@ -19,6 +19,7 @@ import {
   createGatewayModelWithFallback,
   generateAiImage,
   generateLipSync,
+  generateStoryScript,
   generateVideoI2V,
   generateVideoT2V,
   generateVoice,
@@ -27,7 +28,6 @@ import {
 } from "./service";
 import {
   StoryMetadataWithDetails,
-  StoryScript,
   StoryWithImages,
   Timeline,
 } from "../src/lib/types";
@@ -298,16 +298,13 @@ export async function generateStory(options: GenerateOptions) {
     } else {
       storyWithDetails = { shortTitle: title!, content: [] };
 
-      const storySpinner = ora("Generating story...").start();
-      const storyRes = await runCompletion(
-        getGenerateStoryPrompt(title!, topic!),
-        StoryScript,
-      );
-      storySpinner.succeed(chalk.green("Story generated!"));
+      const storySpinner = ora("Generating script...").start();
+      const storyText = await generateStoryScript(getGenerateStoryPrompt(title!, topic!), apiKey!);
+      storySpinner.succeed(chalk.green("Script generated!"));
 
       const descriptionsSpinner = ora("Generating image descriptions...").start();
       const storyWithImagesRes = await runCompletion(
-        getGenerateImageDescriptionPrompt(storyRes.text),
+        getGenerateImageDescriptionPrompt(storyText),
         StoryWithImages,
       );
       descriptionsSpinner.succeed(chalk.green("Image descriptions generated!"));
@@ -364,8 +361,10 @@ export async function generateStory(options: GenerateOptions) {
             prompt: storyItem.imageDescription,
             path: imgPath,
             provider: imageProvider,
-            onRetry: (attempt) => {
-              imagesSpinner.text = `[${step}/${total}] Generating image (retry ${attempt})...`;
+            onRetry: (attempt, providerType) => {
+              imagesSpinner.text = attempt === 0
+                ? `[${step}/${total}] Falling back to ${providerType}...`
+                : `[${step}/${total}] Generating image via ${providerType} (retry ${attempt})...`;
             },
           });
         }

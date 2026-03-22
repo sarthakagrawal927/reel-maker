@@ -2,25 +2,26 @@ import z from "zod";
 import * as fs from "fs";
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from "../src/lib/constants";
 import type { AudioTimestamps } from "../src/lib/types";
-import { generateObject, jsonSchema } from "ai";
+import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 import { fal } from "@fal-ai/client";
 
 export type AiProvider = "gateway";
 
-export const createGatewayModelWithFallback = async <T>(
-  prompt: string,
-  schema: z.ZodType<T>,
-  apiKey: string,
-): Promise<T> => {
-  const baseURL = process.env.FREE_GATEWAY_URL!;
-  // Try up to 3 times — gateway picks a different model each attempt
+// High-reasoning models to try in order
+const HIGH_REASONING_MODELS = ["gemini-2.5-flash", "groq-llama-70b", "workers-ai-llama-3.3-70b"];
+
+const getGatewayModel = (apiKey: string, modelId: string): LanguageModel =>
+  createOpenAI({ apiKey, baseURL: process.env.FREE_GATEWAY_URL! })(modelId);
+
+// Plain text generation (for story scripts — avoids JSON mode issues)
+export const generateStoryScript = async (prompt: string, apiKey: string): Promise<string> => {
   let lastError: Error | null = null;
-  for (let i = 0; i < 3; i++) {
+  for (const modelId of HIGH_REASONING_MODELS) {
     try {
-      const model = createOpenAI({ apiKey, baseURL })("");
-      return await structuredCompletion(prompt, schema, model);
+      const { text } = await generateText({ model: getGatewayModel(apiKey, modelId), prompt });
+      return text.trim();
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
     }
@@ -28,21 +29,37 @@ export const createGatewayModelWithFallback = async <T>(
   throw lastError!;
 };
 
+export const createGatewayModelWithFallback = async <T>(
+  prompt: string,
+  schema: z.ZodType<T>,
+  apiKey: string,
+): Promise<T> => {
+  let lastError: Error | null = null;
+  for (const modelId of HIGH_REASONING_MODELS) {
+    try {
+      return await structuredCompletion(prompt, schema, getGatewayModel(apiKey, modelId));
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastError!;
+};
+
+const stripJsonCodeBlock = (text: string): string => {
+  // Strip ```json ... ``` or ``` ... ``` wrappers
+  const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  return match ? match[1].trim() : text.trim();
+};
+
 export const structuredCompletion = async <T>(
   prompt: string,
   schema: z.ZodType<T>,
   model: LanguageModel,
 ): Promise<T> => {
-  const rawSchema = z.toJSONSchema(schema) as Record<string, unknown>;
-  const { object } = await generateObject({
-    model,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    schema: jsonSchema<T>(rawSchema as any),
-    mode: "json",
-    prompt,
-    maxTokens: 4096,
-  });
-  return object;
+  const { text } = await generateText({ model, prompt, maxTokens: 4096 });
+  const json = stripJsonCodeBlock(text);
+  const parsed = JSON.parse(json);
+  return schema.parse(parsed);
 };
 
 export type ImageProvider =
@@ -101,23 +118,10 @@ const modalFetchWithPolling = async <T>(
   throw new Error("Modal request timed out");
 };
 
-export const generateAiImage = async ({
-  prompt,
-  path,
-  provider,
-  onRetry,
-}: {
-  prompt: string;
-  path: string;
-  provider: ImageProvider;
-  onRetry: (attempt: number) => void;
-}): Promise<void> => {
-  const maxRetries = 3;
-  let attempt = 0;
-  let lastError: Error | null = null;
+const NO_TEXT_SUFFIX = ", no text, no words, no letters, no labels, no watermarks, no captions";
 
-  while (attempt < maxRetries) {
-    try {
+const tryGenerateImage = async (prompt: string, path: string, provider: ImageProvider): Promise<void> => {
+  prompt = prompt + NO_TEXT_SUFFIX;
       if (provider.type === "stablehorde") {
         // Stable Horde — community GPU grid, free with API key
         // Free tier limit: ≤576×576 area, dims must be multiples of 64. Max portrait: 448×576
@@ -205,15 +209,53 @@ export const generateAiImage = async ({
         const response = await fetch(imageUrl);
         fs.writeFileSync(path, Buffer.from(await response.arrayBuffer()));
       }
-      return;
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      attempt++;
-      if (attempt < maxRetries) {
-        const isRateLimit = lastError.message.includes("429");
-        await new Promise((resolve) => setTimeout(resolve, isRateLimit ? 15_000 : 2_000));
-        onRetry(attempt);
+};
+
+export const generateAiImage = async ({
+  prompt,
+  path,
+  provider,
+  onRetry,
+}: {
+  prompt: string;
+  path: string;
+  provider: ImageProvider;
+  onRetry: (attempt: number, providerType: string) => void;
+}): Promise<void> => {
+  // Build provider fallback chain from the selected provider
+  const chain: ImageProvider[] = [provider];
+  // Add downstream fallbacks if not already in chain
+  const fallbacks: ImageProvider[] = [];
+  if (provider.type !== "stablehorde" && process.env.STABLE_HORDE_API_KEY)
+    fallbacks.push({ type: "stablehorde", apiKey: process.env.STABLE_HORDE_API_KEY });
+  if (provider.type !== "modal" && process.env.MODAL_IMAGE_GEN_URL)
+    fallbacks.push({ type: "modal", url: process.env.MODAL_IMAGE_GEN_URL, quality: "fast" });
+  if (provider.type !== "fal" && process.env.FAL_KEY)
+    fallbacks.push({ type: "fal", falKey: process.env.FAL_KEY });
+
+  const allProviders = [...chain, ...fallbacks.filter(f => !chain.some(c => c.type === f.type))];
+  let lastError: Error | null = null;
+
+  for (const p of allProviders) {
+    let attempt = 0;
+    while (attempt < 3) {
+      try {
+        await tryGenerateImage(prompt, path, p);
+        return;
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        // Non-retryable: quota/auth errors — skip to next provider
+        if (lastError.message.includes("402") || lastError.message.includes("401") || lastError.message.includes("403")) break;
+        attempt++;
+        if (attempt < 3) {
+          const isRateLimit = lastError.message.includes("429");
+          await new Promise((r) => setTimeout(r, isRateLimit ? 15_000 : 2_000));
+          onRetry(attempt, p.type);
+        }
       }
+    }
+    if (allProviders.indexOf(p) < allProviders.length - 1) {
+      onRetry(0, allProviders[allProviders.indexOf(p) + 1].type);
     }
   }
 
@@ -221,20 +263,22 @@ export const generateAiImage = async ({
 };
 
 export const getGenerateStoryPrompt = (title: string, topic: string) =>
-  `Write a short story with title [${title}] (its topic is [${topic}]).
-   You must follow best practices for great storytelling.
-   The script must be 8-10 sentences long.
-   Story events can be from anywhere in the world, but text must be translated into English language.
-   Result without any formatting and title, as one continuous text.
-   Skip new lines.`;
+  `Write a punchy, engaging lesson script about [${title}] (topic: [${topic}]).
+   Style: direct and clear like a Fireship or Kurzgesagt explainer — no fluff, no filler.
+   Structure: hook (1 sentence that grabs attention) → what it is → why it matters → how it works → real-world example → key takeaway.
+   The script must be 8-10 sentences total.
+   Do NOT use storytelling wrappers like "In a bustling city..." or fictional characters.
+   Speak directly to the viewer. Use concrete examples, numbers, and analogies where helpful.
+   Output as plain text with no formatting, no title, no newlines.`;
 
 export const getGenerateImageDescriptionPrompt = (storyText: string) =>
   `You are given story text.
-  Generate (in English) exactly 5 very detailed image descriptions for this story.
-  Return their description as json array with story sentences matched to images.
-  Story sentences must be in the same order as in the story and their content must be preserved.
-  Each image must match 1-2 sentence from the story.
-  Images must show story content in a way that is visually appealing and engaging, not just characters.
+  Generate (in English) exactly 5 very detailed image descriptions for this lesson script.
+  Return their description as json array with script segments matched to images.
+  Script segments must be in the same order as in the script and their content must be preserved.
+  Each image must match 1-2 sentences from the script.
+  Images should be conceptual and visual — diagrams, metaphors, abstract representations of technical concepts. Avoid generic people at computers. Think bold infographic-style visuals.
+  IMPORTANT: Do not include any text, words, letters, labels, numbers, or writing in the images. Pure visual only.
   Give output in json format:
 
   {
