@@ -9,6 +9,7 @@
     "lint": "eslint src && tsc",
     "gen": "bun cli/cli.ts",
     "batch": "bun cli/batch.ts",
+    "reddit": "bun cli/reddit.ts",
     "render": "remotion render"
   },
   "repository": {},

@@ -4,3 +4,5 @@ dist
 .env
 out
 public/content/
+.claude/settings.local.json
+reddit-history.json
