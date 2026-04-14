@@ -10,7 +10,8 @@
     "gen": "bun cli/cli.ts",
     "batch": "bun cli/batch.ts",
     "reddit": "bun cli/reddit.ts",
-    "render": "remotion render"
+    "render": "remotion render",
+    "prepare": "husky"
   },
   "repository": {},
   "license": "UNLICENSED",
@@ -44,6 +45,7 @@
     "chalk": "^5.6.2",
     "dotenv": "17.3.1",
     "eslint": "9.19.0",
+    "husky": "^9.1.7",
     "ora": "^9.0.0",
     "prettier": "3.8.1",
     "prompts": "^2.4.2",
@@ -53,5 +55,7 @@
     "yargs": "^18.0.0"
   },
   "private": true,
-  "sideEffects": ["*.css"]
+  "sideEffects": [
+    "*.css"
+  ]
 }
