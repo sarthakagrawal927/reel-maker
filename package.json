@@ -6,7 +6,7 @@
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc",
+    "lint": "tsc",
     "gen": "bun cli/cli.ts",
     "batch": "bun cli/batch.ts",
     "reddit": "bun cli/reddit.ts",
@@ -36,9 +36,6 @@
     "@elevenlabs/elevenlabs-js": "2.44.0",
     "@fal-ai/client": "1.9.6",
     "@remotion/eslint-config-flat": "4.0.451",
-    "@saas-maker/eslint-config": "workspace:*",
-    "@saas-maker/prettier-config": "workspace:*",
-    "@saas-maker/tsconfig": "workspace:*",
     "@types/prompts": "2.4.9",
     "@types/react": "19",
     "@types/uuid": "11.0.0",
@@ -60,6 +57,5 @@
   "private": true,
   "sideEffects": [
     "*.css"
-  ],
-  "prettier": "@saas-maker/prettier-config"
+  ]
 }
