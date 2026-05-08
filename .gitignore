@@ -6,3 +6,7 @@ out
 public/content/
 .claude/settings.local.json
 reddit-history.json
+.env.local
+.cache_ggshield
+.fallow/
+.claude/settings.local.json

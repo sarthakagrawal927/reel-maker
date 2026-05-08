@@ -65,4 +65,29 @@ pnpm lint         # eslint + tsc
 - **Video dimensions**: 1080×1920 (9:16 portrait, TikTok/Reels format).
 - Husky pre-push hook runs lint.
 
+## Idea Backlog — Reels for Education + Reel-as-a-Service (source: `~/Desktop/reference/saas-ideas/README.md` line 89)
+
+### Verticals
+- Anki flashcards rendered as swipe reels (active recall in TikTok format)
+- Multi-reel mind maps for complex concepts; after one reel, branched reels (user picks next path)
+- News reels with community-notes-style annotations
+- Education reels, AI-social-media reels, propaganda reels, advertisement reels
+- Dating profile reels — match by what reels user watches
+
+### Categorisation taxonomy
+- `humour`, `edu`, `slice-of-life`, `advertisement`, `news`
+- Tag every reel → drives recommendation + ad targeting + content moderation
+
+### Reel-as-a-Service (B2B wedge)
+- API: arbitrary chunk of text / data → set of reels
+- Pluggable into Anki, news apps, edtech platforms, propaganda product
+- Reuses current pipeline: AI script → image/video gen → TTS → Remotion render
+- Cache layer (`descriptor.json`) already supports incremental regen — keep for B2B SLA
+
+### Build order from current state
+1. Anki deck → reel pipeline (single user, exports MP4 batch)
+2. Branched reel viewer (web-based player — Remotion Lambda render)
+3. Public reel feed + categorisation backend
+4. Public API for chunk → reels generation
+
 ## Active context
