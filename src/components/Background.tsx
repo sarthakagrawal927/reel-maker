@@ -58,7 +58,7 @@ export const Background: React.FC<{
   };
 
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ background: "linear-gradient(180deg, #020617, #0f172a)" }}>
       {item.videoUrl ? (
         <OffthreadVideo
           src={staticFile(getVideoPath(project, item.videoUrl))}
@@ -71,6 +71,12 @@ export const Background: React.FC<{
           style={sharedStyle}
         />
       )}
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(2,6,23,0.36) 0%, rgba(2,6,23,0.08) 44%, rgba(2,6,23,0.76) 100%)",
+        }}
+      />
     </AbsoluteFill>
   );
 };
