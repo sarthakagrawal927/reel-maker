@@ -1,3 +1,7 @@
+> ⚠️ **Superseded.** This project has been superseded by **[reel-pipeline](https://github.com/sarthak-fleet/reel-pipeline)** (in the `sarthak-fleet` org), where active development continues. This repo is kept for history.
+
+---
+
 # Remotion AI Video template
 
 <p align="center">
