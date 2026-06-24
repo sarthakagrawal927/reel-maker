@@ -4,3 +4,4 @@ dist
 .env
 out
 public/content/
+__pycache__/

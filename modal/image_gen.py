@@ -231,7 +231,7 @@ def download_wan_i2v():
 
 wan_i2v_image = (
     modal.Image.debian_slim(python_version="3.12")
-    .pip_install(*DIFFUSERS_DEPS, "imageio", "imageio-ffmpeg")
+    .pip_install(*DIFFUSERS_DEPS, "imageio", "imageio-ffmpeg", "ftfy")
     .run_function(
         download_wan_i2v,
         volumes={WAN_CACHE: wan_volume},
@@ -245,9 +245,9 @@ class I2VRequest(VideoRequest):
 
 @app.cls(
     image=wan_i2v_image,
-    gpu="A100-40GB",   # 14B model; A10G works but is very slow
+    gpu="A100-80GB",   # 14B model + T5 + CLIP encoders OOM on 40GB; load fully on 80GB (offload is too slow → 600s timeout)
     volumes={WAN_CACHE: wan_volume},
-    timeout=600,
+    timeout=1200,
 )
 class WanI2VGenerator:
     @modal.enter()
@@ -257,7 +257,8 @@ class WanI2VGenerator:
         self.pipe = WanImageToVideoPipeline.from_pretrained(
             WAN_I2V_MODEL, torch_dtype=torch.bfloat16, cache_dir=WAN_CACHE,
         )
-        self.pipe.enable_model_cpu_offload()
+        # 14B fits in 80GB VRAM — load directly to GPU instead of slow CPU offload
+        self.pipe.to("cuda")
 
     @modal.method()
     def generate(
